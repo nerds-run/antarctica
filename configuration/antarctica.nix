@@ -29,6 +29,10 @@
     };
   };
 
+  services.cockpit = {
+    enable = true;
+    openFirewall = true;
+  };
 
   services.openvscode-server = {
     user = "antarctica";
