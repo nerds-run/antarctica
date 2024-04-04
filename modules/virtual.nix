@@ -11,11 +11,7 @@ in
 
   config = mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
-      heroic
-      gnome.gnome-boxes
-      virt-viewer
       quickemu
-      quickgui
       (writeScriptBin "lxc" ''
         ${lib.getExe pkgs.incus} $@
       '')
