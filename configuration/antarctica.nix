@@ -26,7 +26,7 @@
       ];
     };
   };
-  
+
   services.qemuGuest.enable = true;
 
   system.autoUpgrade = {
@@ -40,76 +40,6 @@
     ];
     dates = "12:00";
     randomizedDelaySec = "45min";
-  };
-
-  # services.kasmweb = {
-  #   enable = true;
-  #   listenPort = 4443;
-  #   defaultUserPassword = config.users.users."antarctica".initialPassword;
-  #   defaultAdminPassword = config.users.users."antarctica".initialPassword;
-  # };
-
-  services.woodpecker-server = {
-      enable = true;
-
-      environment = {
-        WOODPECKER_OPEN = "true";
-        WOODPECKER_HOST = "https://woodpecker.localhost";
-        WOODPECKER_DATABASE_DRIVER = "postgres";
-        WOODPECKER_DATABASE_DATASOURCE = "postgres:///woodpecker?host=/run/postgresql";
-        WOODPECKER_ADMIN = "antarctica";
-        WOODPECKER_SERVER_ADDR = ":3000";
-        WOODPECKER_GRPC_ADDR = ":3001";
-
-        WOODPECKER_LOG_LEVEL = "debug";
-      };
-    };
-  
-  services.woodpecker-agents = {
-    agents.docker = {
-      enable = true;
-
-      environment = {
-        WOODPECKER_SERVER = "localhost:3000";
-        WOODPECKER_MAX_WORKFLOWS = "20";
-        WOODPECKER_BACKEND = "docker";
-        WOODPECKER_FILTER_LABELS = "type=docker";
-        WOODPECKER_HEALTHCHECK = "false";
-      };
-    };
-  };
-    systemd.services.woodpecker-server = {
-      serviceConfig = {
-        # Set username for DB access
-        User = "woodpecker";
-
-        BindPaths = [
-          # Allow access to DB path
-          "/run/postgresql"
-        ];
-      };
-    };
-
-    services.postgresql = {
-      enable = true;
-      ensureDatabases = [ "woodpecker" ];
-      ensureUsers = [{
-        name = "woodpecker";
-        ensurePermissions = {
-          "DATABASE woodpecker" = "ALL PRIVILEGES";
-        };
-      }];
-    };
-
-  systemd.services.woodpecker-agent-docker = {
-    after = [ "docker.socket" ];
-    # might break deployment
-    restartIfChanged = false;
-    serviceConfig = {
-      BindPaths = [
-        "/var/run/docker.sock"
-      ];
-    };
   };
 
   programs.rust-motd = {
@@ -152,26 +82,26 @@
     withoutConnectionToken = true;
     extraPackages = with pkgs; [
       (python3.withPackages
-          (p: with p; [
-            python-lsp-server
-            pylsp-mypy
-            pylsp-rope
-            python-lsp-ruff
-          ])
-        )
-        yaml-language-server
-        tailwindcss-language-server
-        clang-tools
-        nil
-        zls
-        marksman
-        rust-analyzer
-        gopls
-        ruff
-        docker-ls
-        vscode-langservers-extracted
-        clojure-lsp
-        dockerfile-language-server-nodejs    
+        (p: with p; [
+          python-lsp-server
+          pylsp-mypy
+          pylsp-rope
+          python-lsp-ruff
+        ])
+      )
+      yaml-language-server
+      tailwindcss-language-server
+      clang-tools
+      nil
+      zls
+      marksman
+      rust-analyzer
+      gopls
+      ruff
+      docker-ls
+      vscode-langservers-extracted
+      clojure-lsp
+      dockerfile-language-server-nodejs
     ];
   };
 
