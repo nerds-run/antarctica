@@ -2,7 +2,7 @@
 , pkgs
 , config
 , ...
-}: rec {
+}: {
   imports = [
     ./hardware-configuration.nix
     ../modules/virtual.nix
@@ -64,6 +64,15 @@
     };
   };
 
+  services.gitea = {
+    enable = true;
+  };
+
+  services.gitea-actions-runner.instances."main" = {
+    enable = true;
+  };
+
+
   services.packagekit.enable = true;
 
   services.openssh = {
@@ -81,6 +90,7 @@
     host = "0.0.0.0";
     withoutConnectionToken = true;
     extraPackages = with pkgs; [
+      neovim
       (python3.withPackages
         (p: with p; [
           python-lsp-server
