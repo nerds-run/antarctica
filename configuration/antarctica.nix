@@ -66,10 +66,18 @@
 
   services.gitea = {
     enable = true;
+    lfs.enable = true;
+    settings = {
+      server.HTTP_PORT = 3030;    
+    };
   };
 
   services.gitea-actions-runner.instances."main" = {
     enable = true;
+    name = "chungus";
+    url = "http://localhost";
+    token = "chungus";
+
     labels= [
       "debian-latest:docker://node:18-bullseye"
       "ubuntu-latest:docker://node:18-bullseye"
