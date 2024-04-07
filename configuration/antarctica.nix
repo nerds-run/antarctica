@@ -70,6 +70,11 @@
 
   services.gitea-actions-runner.instances."main" = {
     enable = true;
+    labels= [
+      "debian-latest:docker://node:18-bullseye"
+      "ubuntu-latest:docker://node:18-bullseye"
+      "native:host"
+    ];
   };
 
 
