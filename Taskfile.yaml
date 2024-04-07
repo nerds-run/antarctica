@@ -1,0 +1,11 @@
+version: '3'
+
+tasks:
+  disk:
+    cmds:
+      - sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko ./disko-config.nix {{.CLI_ARGS}}
+  install:
+    cmds:
+      - sudo nixos-install --flake .# --root {{.MOUNT}} {{.CLI_ARGS}}
+    vars:
+      MOUNT: /mnt
