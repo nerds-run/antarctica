@@ -6,7 +6,7 @@
   imports = [
     ../modules/virtual.nix
     ../modules/impermanence.nix
-    (import ../disko-config { device = "/dev/sda"; })
+    (import ../disko-config.nix { device = "/dev/sda"; })
   ];
 
   system = {
