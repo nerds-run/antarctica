@@ -31,7 +31,7 @@
 
   system.autoUpgrade = {
     enable = true;
-    flake = "github:nerds-run/antarctica";
+    flake = "github:nerds-run/antarctica#antarctica";
     flags = [
       "--update-input"
       "nixpkgs"
@@ -42,8 +42,6 @@
     randomizedDelaySec = "45min";
   };
 
-  users.motdFile = "/var/lib/rust-motd/motd";
-
   # services.kasmweb = {
   #   enable = true;
   #   listenPort = 4443;
@@ -51,7 +49,7 @@
   #   defaultAdminPassword = config.users.users."antarctica".initialPassword;
   # };
 
-  # services.woodpecker-server.enable = true;
+  services.woodpecker-server.enable = true;
 
   programs.rust-motd = {
     enable = true;
@@ -59,7 +57,7 @@
     settings = {
       banner = {
         color = "blue";
-        command = "${pkgs.fastfetch}/bin/fastfetch ; hostnamectl hostname | ${pkgs.figlet}/bin/figlet | ${pkgs.lib.getExe pkgs.lolcat}";
+        command = "hostnamectl hostname | ${pkgs.figlet}/bin/figlet | ${pkgs.lib.getExe pkgs.lolcat}";
       };
       uptime = {
         prefix = "Up";
