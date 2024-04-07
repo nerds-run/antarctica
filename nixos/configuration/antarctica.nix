@@ -60,7 +60,6 @@
       memory = {
         swap_pos = "none";
       };
-      last_login = {};
       service_status = {
         Cockpit = "cockpit";
         VSCode = "openvscode-server";
