@@ -56,14 +56,13 @@ in
         "/var/lib/containers"
         "/var/lib/machines"
         "/var/lib/libvirt"
-        "/var/lib/forgejo"
-        "/var/lib/kasmweb/conf"
-        "/var/lib/kasmweb/conf/database"
         "/etc/NetworkManager/system-connections"
+        config.services.kasmweb.datastorePath
+        config.services.forgejo.stateDir
+        config.services.dockerRegistry.storagePath
       ];
       files = [
         "/etc/machine-id"
-        "/var/lib/kasmweb/conf/database/data.sql"
       ];
     };
 

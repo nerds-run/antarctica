@@ -36,7 +36,7 @@
       "--update-input"
       "nixpkgs"
       "--no-write-lock-file"
-      "-L" # print build logs
+      "-L"
     ];
     dates = "12:00";
     randomizedDelaySec = "45min";
@@ -60,8 +60,26 @@
       service_status = {
         Cockpit = "cockpit";
         VSCode = "openvscode-server";
+        Forgejo = "forgejo";
+        DockerRegistry = "docker-registry";
+        "Hydra Server" = "hydra-server";
       };
     };
+  };
+
+  services.dockerRegistry = {
+    enable = true;
+    enableDelete = true;
+    enableGarbageCollect = true;
+    openFirewall = true;
+  };
+
+
+  # hydra-create-user alice --full-name 'Alice Q. User' --email-address 'alice@example.org' --password-prompt --role admin
+  services.hydra = {
+    enable = true;
+    useSubstitutes = true; # please do not remove this, this will make it so hydra needs to rebuild literally everything
+    hydraURL = "http://localhost:3080";
   };
 
   services.forgejo = {
