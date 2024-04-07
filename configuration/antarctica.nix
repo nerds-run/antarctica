@@ -44,14 +44,14 @@
 
   users.motdFile = "/var/lib/rust-motd/motd";
 
-  services.kasmweb = {
-    enable = true;
-    listenPort = 4443;
-    defaultUserPassword = config.users.users."antarctica".initialPassword;
-    defaultAdminPassword = config.users.users."antarctica".initialPassword;
-  };
+  # services.kasmweb = {
+  #   enable = true;
+  #   listenPort = 4443;
+  #   defaultUserPassword = config.users.users."antarctica".initialPassword;
+  #   defaultAdminPassword = config.users.users."antarctica".initialPassword;
+  # };
 
-  services.woodpecker-server.enable = true;
+  # services.woodpecker-server.enable = true;
 
   programs.rust-motd = {
     enable = true;
