@@ -29,18 +29,36 @@
   
   services.qemuGuest.enable = true;
 
+  system.autoUpgrade = {
+    enable = true;
+    flake = "github:nerds-run/antarctica";
+    flags = [
+      "--update-input"
+      "nixpkgs"
+      "--no-write-lock-file"
+      "-L" # print build logs
+    ];
+    dates = "12:00";
+    randomizedDelaySec = "45min";
+  };
+
+  users.motdFile = "/var/lib/rust-motd/motd";
+
   services.kasmweb = {
     enable = true;
     listenPort = "4443";
-    defaultPassword = config.users.users."antarctica".initialPassword;
+    defaultUserPassword = config.users.users."antarctica".initialPassword;
+    defaultAdminPassword = config.users.users."antarctica".initialPassword;
   };
 
   services.woodpecker-server.enable = true;
 
   programs.rust-motd = {
     enable = true;
+    enableMotdInSSHD = true;
     settings = {
       banner = {
+        color = "blue";
         command = "hostnamectl hostname | ${pkgs.figlet}/bin/figlet | ${pkgs.lib.getExe pkgs.lolcat}";
       };
       uptime = {
