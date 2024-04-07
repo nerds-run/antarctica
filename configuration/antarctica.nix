@@ -79,7 +79,7 @@
   services.hydra = rec {
     enable = true;
     useSubstitutes = true; # please do not remove this, this will make it so hydra needs to rebuild literally everything
-    hydraURL = "http://localhost:${port}";
+    hydraURL = "http://localhost:${toString port}";
     port = 3080;
     buildMachinesFiles = [];
     notificationSender = "hydra@antarctica"; 
