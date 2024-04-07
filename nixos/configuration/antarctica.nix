@@ -57,7 +57,9 @@
         root = "/";
         persist = "/persist";
       };
-      memory = {};
+      memory = {
+        swap_pos = "none";
+      };
       last_login = {};
       service_status = {
         Cockpit = "cockpit";
