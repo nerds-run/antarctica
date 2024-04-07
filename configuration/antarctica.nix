@@ -64,8 +64,12 @@
     };
   };
 
-  services.gitea = {
+  services.forgejo = {
     enable = true;
+    useWizard = true;
+    appName = "Antarctica Forgejo Service";
+    dump.enable = true;
+    dump.type = "tar.zst";
     lfs.enable = true;
     settings = {
       server.HTTP_PORT = 3030;    
@@ -84,7 +88,6 @@
       "native:host"
     ];
   };
-
 
   services.packagekit.enable = true;
 
