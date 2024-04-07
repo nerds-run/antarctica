@@ -4,9 +4,9 @@
 , ...
 }: rec {
   imports = [
+    ./hardware-configuration.nix
     ../modules/virtual.nix
     ../modules/impermanence.nix
-    (import ../disko-config.nix { device = "/dev/sda"; })
   ];
 
   system = {

@@ -42,11 +42,6 @@ in
       nvram = [ "/run/libvirt/nix-ovmf/AAVMF_CODE.fd:/run/libvirt/nix-ovmf/AAVMF_VARS.fd", "/run/libvirt/nix-ovmf/OVMF_CODE.fd:/run/libvirt/nix-ovmf/OVMF_VARS.fd" ]
     '';
 
-    programs.vscode = {
-      enable = true;
-      package = pkgs.vscodium;
-    };
-
     programs.direnv = {
       enable = true;
       enableNushellIntegration = true;
@@ -112,6 +107,7 @@ in
     };
 
     home.packages = with pkgs; [
+      waypipe
       unzip
       git
       ollama
@@ -133,14 +129,11 @@ in
       fh
       trashy
       android-tools
-      wireshark
       wormhole-rs
       lldb
       gdb
-      okteta
       bubblewrap
       just
-      waypipe
       cage
       distrobox
       cosign
@@ -149,9 +142,6 @@ in
       kind
       kubectl
       talosctl
-      gitg
-      gource
-      meld
       jujutsu
       melange
       dive

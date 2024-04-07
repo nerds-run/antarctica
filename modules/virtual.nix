@@ -29,7 +29,5 @@ in
       libvirtd.enable = true;
       incus.enable = true;
     };
-
-    programs.virt-manager.enable = true;
   };
 }

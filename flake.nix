@@ -55,7 +55,7 @@
 
       nixosConfigurations = rec {
         default = antarctica;
-        antarctica = generateSystemConfiguration "antarctica" "x86_64-linux" "/dev/vda";
+        antarctica = generateSystemConfiguration "antarctica" "x86_64-linux" "/dev/sda";
       };
 
       formatter = forEachSupportedSystem ({ pkgs }: pkgs.nixpkgs-fmt);
