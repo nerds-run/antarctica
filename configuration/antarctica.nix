@@ -67,11 +67,11 @@
   services.forgejo = {
     enable = true;
     useWizard = true;
-    appName = "Antarctica Forgejo Service";
     dump.enable = true;
     dump.type = "tar.zst";
     lfs.enable = true;
     settings = {
+      DEFAULT.APP_NAME = "Antarctica Forgejo Service";
       server.HTTP_PORT = 3030;    
     };
   };
