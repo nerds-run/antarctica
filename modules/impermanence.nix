@@ -63,10 +63,13 @@ in
         "/var/lib/iwd"
         "/var/lib/gitea"
         "/var/lib/gitea-runner"
-        "/var/lib/forgejo"
         "/var/lib/kasmweb/conf"
         "/var/lib/kasmweb/conf/database"
         "/etc/NetworkManager/system-connections"
+        {
+          directory = "/var/lib/forgejo";
+          method = "symlink";
+        }
       ];
       files = [
         "/etc/machine-id"
