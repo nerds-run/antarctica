@@ -12,9 +12,6 @@ in
   config = mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
       quickemu
-      (writeScriptBin "lxc" ''
-        ${lib.getExe pkgs.incus} $@
-      '')
     ];
 
     virtualisation = {
@@ -27,7 +24,6 @@ in
       };
       docker.enable = true;
       libvirtd.enable = true;
-      incus.enable = true;
     };
   };
 }

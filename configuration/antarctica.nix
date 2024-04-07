@@ -33,7 +33,7 @@
     enable = true;
     settings = {
       banner = {
-        command = "hostnamectl hostname | ${pkgs.lib.getExe pkgs.figlet} | ${pkgs.lib.getExe pkgs.lolcat}";
+        command = "hostnamectl hostname | ${pkgs.figlet}/bin/figlet | ${pkgs.lib.getExe pkgs.lolcat}";
       };
       uptime = {
         prefix = "Up";
@@ -47,6 +47,11 @@
         VSCode = "openvscode-server";
       };
     };
+  };
+
+  services.openssh = {
+    enable = true;
+    openFirewall = true;
   };
 
   services.cockpit = {
@@ -99,7 +104,8 @@
   networking = {
     networkmanager.enable = true;
     hostName = "antarctica";
-    nftables.enable = true;
+    nftables.enable = false;
+    firewall.enable = pkgs.lib.mkForce false;
   };
 
   zramSwap.enable = true;
