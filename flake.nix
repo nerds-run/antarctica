@@ -2,7 +2,6 @@
 {
   description = "Development environment for remote usage";
   inputs = {
-    lollypops.url = "github:pinpox/lollypops";
     flake-schemas.url = "https://flakehub.com/f/DeterminateSystems/flake-schemas/*.tar.gz";
     home-manager = {
       url = "github:nix-community/home-manager/master";
@@ -23,7 +22,6 @@
     , disko
     , home-manager
     , impermanence
-    , lollypops
     } @ inputs:
     let
       supportedSystems = [ "x86_64-linux" "aarch64-darwin" "x86_64-darwin" "aarch64-linux" ];
@@ -37,7 +35,6 @@
           inherit inputs;
         };
         modules = [
-          inputs.lollypops.nixosModules.lollypops
           inputs.disko.nixosModules.disko
           inputs.impermanence.nixosModules.impermanence
           inputs.home-manager.nixosModules.home-manager
@@ -54,7 +51,7 @@
         default = antarctica;
         antarctica = mkSystem "antarctica" "x86_64-linux" "/dev/sda";
       };
-      apps."x86_64-linux".default = lollypops.apps."x86_64-linux".default { configFlake = self; };
+
       formatter = forEachSupportedSystem ({ pkgs }: pkgs.nixpkgs-fmt);
       devShells = forEachSupportedSystem ({ pkgs }: {
         default = pkgs.mkShell {
