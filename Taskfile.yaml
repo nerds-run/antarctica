@@ -3,9 +3,15 @@ version: '3'
 tasks:
   disk:
     cmds:
-      - sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko ./disko-config.nix {{.CLI_ARGS}}
+      - sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko ./disko-config.nix --arg device '"{{.DEVICE}}"' {{.CLI_ARGS}}
+    vars:
+      DEVICE: /dev/sda
   install:
     cmds:
-      - sudo nixos-install --flake .# --root {{.MOUNT}} {{.CLI_ARGS}}
+      - sudo nixos-install --root {{.MOUNT}} --flake .#{{.CONFIGURATION}} {{.CLI_ARGS}}
+      - mkdir -p /mnt/persist/etc/nixos
+      - git clone {{.INSTALL_FLAKE}} /mnt/persist/etc/nixos
     vars:
+      INSTALL_FLAKE: https://github.com/nerds-run/antarctica 
       MOUNT: /mnt
+      CONFIGURATION: antarctica

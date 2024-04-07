@@ -6,6 +6,7 @@
   imports = [
     ../modules/virtual.nix
     ../modules/impermanence.nix
+    (import ../disko-config { device = "/dev/sda"; })
   ];
 
   system = {
@@ -22,12 +23,11 @@
     binfmt = {
       emulatedSystems = [
         "aarch64-linux"
-        "wasm32-wasi"
-        "wasm64-wasi"
-        "x86_64-windows"
       ];
     };
   };
+
+  services.qemuGuest.enable = true;
 
   services.cockpit = {
     enable = true;
