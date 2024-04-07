@@ -46,7 +46,7 @@
 
   services.kasmweb = {
     enable = true;
-    listenPort = "4443";
+    listenPort = 4443;
     defaultUserPassword = config.users.users."antarctica".initialPassword;
     defaultAdminPassword = config.users.users."antarctica".initialPassword;
   };

@@ -140,6 +140,7 @@ in
       jsonnet
       kubernetes-helm
       kind
+      go-task
       kubectl
       talosctl
       jujutsu
