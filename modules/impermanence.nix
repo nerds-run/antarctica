@@ -61,6 +61,7 @@ in
         "/var/lib/tailscale"
         "/var/cache/tailscale"
         "/var/lib/iwd"
+        "/var/lib/kasmweb"
         "/etc/NetworkManager/system-connections"
       ];
       files = [
