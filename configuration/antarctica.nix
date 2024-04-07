@@ -59,7 +59,7 @@
     settings = {
       banner = {
         color = "blue";
-        command = "hostnamectl hostname | ${pkgs.figlet}/bin/figlet | ${pkgs.lib.getExe pkgs.lolcat}";
+        command = "${pkgs.fastfetch}/bin/fastfetch ; hostnamectl hostname | ${pkgs.figlet}/bin/figlet | ${pkgs.lib.getExe pkgs.lolcat}";
       };
       uptime = {
         prefix = "Up";
