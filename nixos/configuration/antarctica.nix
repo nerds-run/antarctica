@@ -195,7 +195,7 @@
       antarctica = _: {
         imports = [
           inputs.impermanence.nixosModules.home-manager.impermanence
-          ../home-manager/configurations/antarctica.nix
+          ../../home-manager/configurations/antarctica.nix
         ];
       };
     };
