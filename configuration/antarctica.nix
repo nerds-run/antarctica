@@ -75,7 +75,7 @@
   services.gitea-actions-runner.instances."main" = {
     enable = true;
     name = "chungus";
-    url = "http://localhost";
+    url = "http://localhost:3030";
     token = "chungus";
 
     labels= [

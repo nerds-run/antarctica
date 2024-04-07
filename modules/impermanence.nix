@@ -61,6 +61,8 @@ in
         "/var/lib/tailscale"
         "/var/cache/tailscale"
         "/var/lib/iwd"
+        "/var/lib/gitea"
+        "/var/lib/gitea-runner"
         "/var/lib/kasmweb/conf"
         "/var/lib/kasmweb/conf/database"
         "/etc/NetworkManager/system-connections"
