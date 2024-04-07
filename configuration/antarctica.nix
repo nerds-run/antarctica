@@ -26,8 +26,28 @@
       ];
     };
   };
-
+  
   services.qemuGuest.enable = true;
+
+  programs.rust-motd = {
+    enable = true;
+    settings = {
+      banner = {
+        command = "hostnamectl hostname | ${pkgs.lib.getExe pkgs.figlet} | ${pkgs.lib.getExe pkgs.lolcat}";
+      };
+      uptime = {
+        prefix = "Up";
+      };
+      filesystems = {
+        root = "/";
+        persist = "/persist";
+      };
+      service_status = {
+        Cockpit = "cockpit";
+        VSCode = "openvscode-server";
+      };
+    };
+  };
 
   services.cockpit = {
     enable = true;
@@ -35,8 +55,9 @@
   };
 
   services.openvscode-server = {
-    user = "antarctica";
     enable = true;
+    host = "0.0.0.0";
+    withoutConnectionToken = true;
     extraPackages = with pkgs; [
       (python3.withPackages
           (p: with p; [
@@ -86,14 +107,6 @@
 
   time.timeZone = "America/Chicago";
   i18n.defaultLocale = "en_US.UTF-8";
-
-  hardware = {
-    bluetooth.enable = true;
-    opentabletdriver = {
-      enable = true;
-      daemon.enable = true;
-    };
-  };
 
   services.system76-scheduler.enable = true;
 

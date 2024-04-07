@@ -2,16 +2,29 @@ version: '3'
 
 tasks:
   disk:
+    summary: Format a disk with Disko, /dev/sda by default. 
     cmds:
-      - sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko ./disko-config.nix --arg device '"{{.DEVICE}}"' {{.CLI_ARGS}}
+      - sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko {{.DISKO_PATH}} --arg device '"{{.DEVICE}}"' {{.CLI_ARGS}}
     vars:
       DEVICE: /dev/sda
+      DISKO_PATH: ./disko-config.nix
   install:
+    summary: Install a NixOS configuration and copy it over to the install disk
     cmds:
-      - sudo nixos-install --root {{.MOUNT}} --flake .#{{.CONFIGURATION}} {{.CLI_ARGS}}
-      - mkdir -p /mnt/persist/etc/nixos
-      - git clone {{.INSTALL_FLAKE}} /mnt/persist/etc/nixos
+      - sudo mkdir -p /mnt/persist/system /mnt/persist/home
+      - sudo mkdir -p {{.CONFIG_FOLDER}}
+      - sudo git clone {{.INSTALL_FLAKE}} {{.CONFIG_FOLDER}}
+      - sudo nixos-install --root {{.MOUNT}} --flake {{.FLAKE_PATH}}#{{.CONFIGURATION}} {{.CLI_ARGS}}
     vars:
-      INSTALL_FLAKE: https://github.com/nerds-run/antarctica 
+      CONFIG_FOLDER: /mnt/persist/etc/nixos
+      INSTALL_FLAKE: https://github.com/nerds-run/antarctica
+      FLAKE_PATH: .
       MOUNT: /mnt
+      CONFIGURATION: antarctica
+  rebuild:
+    summary: Refresh already installed system with a specified flake
+    cmds:
+      - sudo nixos-rebuild --flake {{.FLAKE_PATH}}#{{.CONFIGURATION}} switch {{.CLI_ARGS}}
+    vars:
+      FLAKE_PATH: .
       CONFIGURATION: antarctica
