@@ -66,7 +66,6 @@
 
   services.forgejo = {
     enable = true;
-    useWizard = true;
     dump.enable = true;
     dump.type = "tar.zst";
     lfs.enable = true;
