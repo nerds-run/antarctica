@@ -47,8 +47,8 @@
     enableMotdInSSHD = true;
     settings = {
       banner = {
-        color = "lightmagenta";
-        command = "hostnamectl hostname | ${pkgs.figlet}/bin/figlet -f ogre | ${pkgs.lib.getExe pkgs.lolcat}";
+        color = "light_magenta";
+        command = "hostnamectl hostname | ${pkgs.figlet}/bin/figlet | ${pkgs.lib.getExe pkgs.lolcat}";
       };
       uptime = {
         prefix = "Up";
