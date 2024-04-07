@@ -60,7 +60,7 @@ in
         config.services.kasmweb.datastorePath
         config.services.forgejo.stateDir
         config.services.dockerRegistry.storagePath
-      ];
+      ] ++ config.services.hydra.buildMachinesFiles;
       files = [
         "/etc/machine-id"
       ];
