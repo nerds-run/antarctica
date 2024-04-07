@@ -61,11 +61,13 @@ in
         "/var/lib/tailscale"
         "/var/cache/tailscale"
         "/var/lib/iwd"
-        "/var/lib/kasmweb"
+        "/var/lib/kasmweb/conf"
+        "/var/lib/kasmweb/conf/database"
         "/etc/NetworkManager/system-connections"
       ];
       files = [
         "/etc/machine-id"
+        "/var/lib/kasmweb/conf/database/data.sql"
       ];
     };
 
