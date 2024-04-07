@@ -2,14 +2,16 @@ version: '3'
 
 tasks:
   disk:
-    summary: Format a disk with Disko, /dev/sda by default. 
+    desc: Format a disk with Disko, /dev/sda by default.
+    summary: Formats a disk using disko with parted as a backend, make sure to select the right disk as it will forcefully wipe it 
     cmds:
       - sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko {{.DISKO_PATH}} --arg device '"{{.DEVICE}}"' {{.CLI_ARGS}}
     vars:
       DEVICE: /dev/sda
-      DISKO_PATH: ./disko-config.nix
+      DISKO_PATH: ./nixos/disko-config.nix
   install:
-    summary: Install a NixOS configuration and copy it over to the install disk
+    desc: Install a NixOS configuration and copy it over to the install disk
+    summary: Installs NixOS on a specified disk through flakes and clones the repo over to it
     cmds:
       - sudo mkdir -p /mnt/persist/system /mnt/persist/home
       - sudo mkdir -p {{.CONFIG_FOLDER}}
@@ -22,9 +24,14 @@ tasks:
       MOUNT: /mnt
       CONFIGURATION: antarctica
   rebuild:
-    summary: Refresh already installed system with a specified flake
+    desc: Refresh already installed system with a specified flake
+    summary: Rebases the current system configuration over to the new one on runtime (switch!)
     cmds:
       - sudo nixos-rebuild --flake {{.FLAKE_PATH}}#{{.CONFIGURATION}} switch {{.CLI_ARGS}}
     vars:
       FLAKE_PATH: .
       CONFIGURATION: antarctica
+  hydra-setup:
+    cmds:
+      - echo Todo!
+      # hydra-create-user alice --full-name 'Alice Q. User' --email-address 'alice@example.org' --password-prompt --role admin

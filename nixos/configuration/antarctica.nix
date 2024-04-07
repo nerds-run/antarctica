@@ -47,8 +47,8 @@
     enableMotdInSSHD = true;
     settings = {
       banner = {
-        color = "blue";
-        command = "hostnamectl hostname | ${pkgs.figlet}/bin/figlet | ${pkgs.lib.getExe pkgs.lolcat}";
+        color = "lightmagenta";
+        command = "hostnamectl hostname | ${pkgs.figlet}/bin/figlet -f ogre | ${pkgs.lib.getExe pkgs.lolcat}";
       };
       uptime = {
         prefix = "Up";
@@ -57,11 +57,13 @@
         root = "/";
         persist = "/persist";
       };
+      memory = {};
+      last_login = {};
       service_status = {
         Cockpit = "cockpit";
         VSCode = "openvscode-server";
         Forgejo = "forgejo";
-        DockerRegistry = "docker-registry";
+        "Docker Registry" = "docker-registry";
         "Hydra Server" = "hydra-server";
       };
     };
@@ -73,7 +75,6 @@
     enableGarbageCollect = true;
     openFirewall = true;
   };
-
 
   # hydra-create-user alice --full-name 'Alice Q. User' --email-address 'alice@example.org' --password-prompt --role admin
   services.hydra = rec {
