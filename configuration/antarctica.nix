@@ -29,6 +29,14 @@
   
   services.qemuGuest.enable = true;
 
+  services.kasmweb = {
+    enable = true;
+    listenPort = "4443";
+    defaultPassword = config.users.users."antarctica".initialPassword;
+  };
+
+  services.woodpecker-server.enable = true;
+
   programs.rust-motd = {
     enable = true;
     settings = {
@@ -48,6 +56,8 @@
       };
     };
   };
+
+  services.packagekit.enable = true;
 
   services.openssh = {
     enable = true;
@@ -134,8 +144,6 @@
 
   nixpkgs.config.allowUnfree = true;
   virtualisation.managed.enable = true;
-  security.sudo.enable = false;
-  security.sudo-rs.enable = !(security.sudo.enable);
 
   home-manager = {
     extraSpecialArgs = {
