@@ -75,19 +75,6 @@
     };
   };
 
-  services.gitea-actions-runner.instances."main" = {
-    enable = true;
-    name = "chungus";
-    url = "http://localhost:3030";
-    token = "chungus";
-
-    labels= [
-      "debian-latest:docker://node:18-bullseye"
-      "ubuntu-latest:docker://node:18-bullseye"
-      "native:host"
-    ];
-  };
-
   services.packagekit.enable = true;
 
   services.openssh = {

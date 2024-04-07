@@ -51,25 +51,15 @@ in
       directories = [
         "/etc/nixos"
         "/var/log"
-        "/var/lib/bluetooth"
         "/var/lib/nixos"
-        "/var/lib/incus"
         "/var/lib/systemd/coredump"
         "/var/lib/containers"
         "/var/lib/machines"
         "/var/lib/libvirt"
-        "/var/lib/tailscale"
-        "/var/cache/tailscale"
-        "/var/lib/iwd"
-        "/var/lib/gitea"
-        "/var/lib/gitea-runner"
+        "/var/lib/forgejo"
         "/var/lib/kasmweb/conf"
         "/var/lib/kasmweb/conf/database"
         "/etc/NetworkManager/system-connections"
-        {
-          directory = "/var/lib/forgejo";
-          method = "symlink";
-        }
       ];
       files = [
         "/etc/machine-id"
