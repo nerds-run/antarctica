@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="./assets/antarctica_logo_temp" alt="antarctica logo" width="200rem"/> 
+    <img src="./assets/antarctica_logo_temp.png" alt="antarctica logo" width="200rem"/>
     <h1 style="font-size: 48px; margin-left: 0.1em; text-align: center;">Antarctica</h1>
 </div>
 
