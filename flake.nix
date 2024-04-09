@@ -2,6 +2,7 @@
 {
   description = "Development environment for remote usage";
   inputs = {
+    agenix.url = "github:ryantm/agenix";
     flake-schemas.url = "https://flakehub.com/f/DeterminateSystems/flake-schemas/*.tar.gz";
     home-manager = {
       url = "github:nix-community/home-manager/master";
@@ -22,6 +23,7 @@
     , disko
     , home-manager
     , impermanence
+    , agenix
     } @ inputs:
     let
       supportedSystems = [ "x86_64-linux" "aarch64-darwin" "x86_64-darwin" "aarch64-linux" ];
@@ -37,12 +39,12 @@
         modules = [
           inputs.disko.nixosModules.disko
           inputs.impermanence.nixosModules.impermanence
+          inputs.agenix.nixosModules.default
           inputs.home-manager.nixosModules.home-manager
           (import ./nixos/disko-config.nix { inherit device; })
           ./nixos/configuration/${hostName}.nix
         ];
       };
-
     in
     {
       schemas = flake-schemas.schemas;

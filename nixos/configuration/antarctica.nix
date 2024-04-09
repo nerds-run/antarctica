@@ -28,6 +28,13 @@
     };
   };
 
+  age.secrets = {
+    woodpecker = {
+      file = ../../secrets/age/woodpecker.age;
+      path = "/run/secrets/woodpecker.env";
+    };
+  };
+    
   services.qemuGuest.enable = true;
 
   antarctica = {
