@@ -15,7 +15,7 @@
     };
     admin = mkOption {
       type = types.str;
-      default = "abanna";
+      default = "abanna,tulilirockz";
       example = "admin";
       description = "Name of the admin user";
     };
