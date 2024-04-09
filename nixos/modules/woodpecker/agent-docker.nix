@@ -11,7 +11,7 @@ in
         enable = true;
 
         environment = {
-          WOODPECKER_SERVER = "forgejo.dev.nerds.run:${toString cfg.rpcPort}";
+          WOODPECKER_SERVER = "woodpecker.dev.nerds.run:${toString cfg.rpcPort}";
           WOODPECKER_MAX_WORKFLOWS = "10";
           WOODPECKER_BACKEND = "docker";
           WOODPECKER_FILTER_LABELS = "type=docker";
