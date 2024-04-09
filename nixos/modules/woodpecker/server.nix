@@ -43,10 +43,10 @@ in
     services.postgresql = {
       enable = true;
       ensureDatabases = [ "woodpecker" ];
-      ensureUsers."woodpecker" = {
+      ensureUsers = [{
         name = "woodpecker";
         ensureClauses.superuser = true;
-      };
+      }];
     };
   };
 }
