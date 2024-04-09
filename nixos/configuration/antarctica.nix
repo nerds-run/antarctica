@@ -99,7 +99,10 @@
     lfs.enable = true;
     settings = {
       DEFAULT.APP_NAME = "Antarctica Forgejo Service";
-      server.HTTP_PORT = 3030;
+      server = {
+        DOMAIN = "forgejo.dev.nerds.run";
+        HTTP_PORT = 3030;
+      };
     };
   };
 
