@@ -9,7 +9,7 @@ in
 
       environment = {
         WOODPECKER_OPEN = "true";
-        WOODPECKER_HOST = "http://forgejo.dev.nerds.run";
+        WOODPECKER_HOST = "http://forgejo.dev.nerds.run:${cfg.port}";
         WOODPECKER_DATABASE_DRIVER = "postgres";
         WOODPECKER_DATABASE_DATASOURCE = "postgres:///woodpecker?host=/run/postgresql";
         WOODPECKER_ADMIN = "${cfg.admin}";
