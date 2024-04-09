@@ -32,11 +32,6 @@ in
           # Allow access to DB path
           "/run/postgresql"
         ];
-
-        EnvironmentFile = [
-          cfg.secretFile
-          cfg.sharedSecretFile
-        ];
       };
     };
 
