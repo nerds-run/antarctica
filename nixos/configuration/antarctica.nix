@@ -30,7 +30,7 @@
 
   age.secrets = {
     woodpecker = {
-      file = ../../secrets/age/woodpecker.age;
+      file = ../../secrets/woodpecker.age;
       path = "/run/secrets/woodpecker.env";
     };
   };
