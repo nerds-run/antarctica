@@ -24,9 +24,6 @@ in
       };
     };
 
-    # Make sure it is activated in that case
-    my.system.docker.enable = true;
-
     # FIXME: figure out the issue
     services.unbound.resolveLocalQueries = false;
 
