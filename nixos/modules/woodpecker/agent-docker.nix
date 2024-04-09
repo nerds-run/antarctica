@@ -18,7 +18,7 @@ in
           WOODPECKER_HEALTHCHECK = "false";
         };
 
-        environmentFile = [ cfg.sharedSecretFile ];
+        environmentFile = [ cfg.secretFile ];
 
         extraGroups = [ "docker" ];
       };
