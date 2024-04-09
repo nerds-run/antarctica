@@ -33,12 +33,12 @@
     };
     secretFile = mkOption {
       type = types.str;
-      default = "/run/secrets/woodpecker.env";
+      default = "/run/woodpecker.env";
       description = "Secrets to inject into Woodpecker server";
     };
     sharedSecretFile = mkOption {
       type = types.str;
-      default = "/run/secrets/woodpecker.env";
+      default = "/run/woodpecker.shared.env";
       description = "Shared RPC secret to inject into server and runners";
     };
   };
