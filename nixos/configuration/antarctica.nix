@@ -7,6 +7,7 @@
     ./hardware-configuration.nix
     ../modules/virtual.nix
     ../modules/impermanence.nix
+    ../modules/woodpecker/default.nix
   ];
 
   system = {
@@ -28,6 +29,10 @@
   };
 
   services.qemuGuest.enable = true;
+
+  antarctica = {
+    services.woodpecker.enable = true;
+  };
 
   system.autoUpgrade = {
     enable = true;
