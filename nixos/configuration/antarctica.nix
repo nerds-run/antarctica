@@ -83,8 +83,8 @@
     useSubstitutes = true; # please do not remove this, this will make it so hydra needs to rebuild literally everything
     hydraURL = "http://localhost:${toString port}";
     port = 3080;
-    buildMachinesFiles = [];
-    notificationSender = "hydra@antarctica"; 
+    buildMachinesFiles = [ ];
+    notificationSender = "hydra@antarctica";
   };
 
   services.forgejo = {
@@ -94,7 +94,7 @@
     lfs.enable = true;
     settings = {
       DEFAULT.APP_NAME = "Antarctica Forgejo Service";
-      server.HTTP_PORT = 3030;    
+      server.HTTP_PORT = 3030;
     };
   };
 
@@ -103,6 +103,18 @@
   services.openssh = {
     enable = true;
     openFirewall = true;
+    allowSFTP = false;
+    settings = {
+      KbdInteractiveAuthentication = false;
+      PasswordAuthentication = true;
+    };    
+    extraConfig = ''
+      AllowTcpForwarding yes
+      X11Forwarding no
+      AllowAgentForwarding no
+      AllowStreamLocalForwarding no
+      AuthenticationMethods publickey
+    '';
   };
 
   services.cockpit = {
@@ -146,8 +158,11 @@
     users.antarctica = {
       isNormalUser = true;
       initialPassword = "antarctica";
-      extraGroups = [ "wheel" "libvirtd" "incus-admin" "qemu" ];
+      extraGroups = [ "wheel" "libvirtd" "qemu" ];
       shell = config.users.defaultUserShell;
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQB1RVrTnUl5JDIs19lzIJVGi60yuXB7zYCcwN/XxZ tulili@studio"
+      ];
     };
   };
 
@@ -186,6 +201,10 @@
 
   nixpkgs.config.allowUnfree = true;
   virtualisation.managed.enable = true;
+
+  security.sudo.extraConfig = ''
+    Defaults lecture = never
+  '';
 
   home-manager = {
     extraSpecialArgs = {

@@ -27,10 +27,11 @@ tasks:
     desc: Refresh already installed system with a specified flake
     summary: Rebases the current system configuration over to the new one on runtime (switch!)
     cmds:
-      - sudo nixos-rebuild --flake {{.FLAKE_PATH}}#{{.CONFIGURATION}} switch {{.CLI_ARGS}}
+      - nixos-rebuild --use-remote-sudo --flake {{.FLAKE_PATH}}#{{.CONFIGURATION}} {{.REBUILD_COMMAND}} {{.CLI_ARGS}}
     vars:
       FLAKE_PATH: .
       CONFIGURATION: antarctica
+      REBUILD_COMMAND: switch 
   hydra-setup:
     cmds:
       - echo Todo!
