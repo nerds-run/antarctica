@@ -11,7 +11,7 @@ in
         enable = true;
 
         environment = {
-          WOODPECKER_SERVER = "localhost:${toString cfg.rpcPort}";
+          WOODPECKER_SERVER = "0.0.0.0:${toString cfg.rpcPort}";
           WOODPECKER_MAX_WORKFLOWS = "10";
           WOODPECKER_BACKEND = "docker";
           WOODPECKER_FILTER_LABELS = "type=docker";
