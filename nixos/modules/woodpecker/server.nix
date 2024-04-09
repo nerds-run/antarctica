@@ -35,7 +35,6 @@ in
 
         EnvironmentFile = [
           cfg.secretFile
-          cfg.sharedSecretFile
         ];
       };
     };
