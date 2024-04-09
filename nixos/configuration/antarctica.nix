@@ -110,6 +110,9 @@
         DOMAIN = "forgejo.dev.nerds.run";
         HTTP_PORT = 3030;
       };
+      webhook = {
+        ALLOWED_HOST_LIST = ["external" "loopback"];
+      };
     };
   };
 
