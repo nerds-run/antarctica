@@ -57,6 +57,7 @@ in
         "/var/lib/machines"
         "/var/lib/agenix"
         "/var/lib/libvirt"
+        "/var/lib/docker"
         "/etc/NetworkManager/system-connections"
         "/etc/ssh"
         config.services.kasmweb.datastorePath
