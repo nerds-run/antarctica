@@ -55,6 +55,7 @@ in
         "/var/lib/systemd/coredump"
         "/var/lib/containers"
         "/var/lib/machines"
+        "/var/lib/agenix"
         "/var/lib/libvirt"
         "/etc/NetworkManager/system-connections"
         "/etc/ssh"

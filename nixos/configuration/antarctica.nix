@@ -28,6 +28,8 @@
     };
   };
 
+  age.secretsMountPoint = "/var/lib/agenix/secret-generations";
+  age.secretsDir = "/var/lib/agenix/keys";
   age.secrets = {
     woodpecker = {
       file = ../../secrets/woodpecker.age;
