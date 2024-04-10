@@ -123,6 +123,7 @@
   services.gitea-actions-runner.instances = {
     antarctica = {
       enable = true;
+      name = "antarctica";
       url = config.services.forgejo.settings.server.ROOT_URL;
       labels =
         [
