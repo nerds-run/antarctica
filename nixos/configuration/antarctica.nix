@@ -33,6 +33,10 @@
       file = ../../secrets/woodpecker.age;
       path = "/run/secrets/woodpecker.env";
     };
+    action-runner = {
+      file = ../../secrets/action-runner.age;
+      path = "/run/secrets/action-runner.env";
+    };
   };
     
   services.qemuGuest.enable = true;
@@ -113,6 +117,18 @@
       webhook = {
         ALLOWED_HOST_LIST = "external,loopback";
       };
+    };
+  };
+
+  services.gitea-actions-runner.instances = {
+    antarctica = {
+      enable = true;
+      labels =
+        [
+          "debian-latest:docker://node:20-bullseye"
+          "ubuntu-latest:docker://node:20-bullseye"
+        ];
+      tokenFile = "/run/secrets/action-runner.env";
     };
   };
 

@@ -4,4 +4,5 @@ let
 in
 {
   "woodpecker.age".publicKeys = [ antarctica ];
+  "action-runner.age".publicKeys = [ antarctica ];
 }
