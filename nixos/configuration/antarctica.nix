@@ -123,6 +123,7 @@
   services.gitea-actions-runner.instances = {
     antarctica = {
       enable = true;
+      url = config.services.forgejo.settings.server.ROOT_URL;
       labels =
         [
           "debian-latest:docker://node:20-bullseye"
