@@ -61,6 +61,7 @@
             curl
             jq
             nixpkgs-fmt
+            go-task
           ];
         };
       });

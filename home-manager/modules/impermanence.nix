@@ -40,14 +40,8 @@
       ".local/share/dotnet"
       ".local/share/direnv"
       ".local/share/nvim"
-      {
-        directory = ".local/share/images";
-        method = "symlink";
-      }
-      {
-        directory = ".local/share/containers";
-        method = "symlink";
-      }
+      ".local/share/images"
+      ".local/share/containers"
     ];
   };
 }

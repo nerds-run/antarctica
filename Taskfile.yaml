@@ -23,7 +23,7 @@ tasks:
       FLAKE_PATH: .
       MOUNT: /mnt
       CONFIGURATION: antarctica
-  rebuild:
+  rebuild:local:
     desc: Refresh already installed system with a specified flake
     summary: Rebases the current system configuration over to the new one on runtime (switch!)
     cmds:
@@ -31,7 +31,18 @@ tasks:
     vars:
       FLAKE_PATH: .
       CONFIGURATION: antarctica
-      REBUILD_COMMAND: switch 
+      REBUILD_COMMAND: switch
+  rebuild:remote:
+    desc: Refresh already installed system with a specified flake over SSH
+    summary: Rebases the SSH'd current system configuration over to the new one on runtime (switch!)
+    cmds:
+      - nixos-rebuild --use-remote-sudo --target-host {{.TARGET_HOST}} --build-host {{.BUILD_HOST}} --flake {{.FLAKE_PATH}}#{{.CONFIGURATION}} {{.REBUILD_COMMAND}} {{.CLI_ARGS}}
+    vars:
+      FLAKE_PATH: .
+      CONFIGURATION: antarctica
+      REBUILD_COMMAND: switch
+      TARGET_HOST: antarctica@forgejo.dev.nerds.run
+      BUILD_HOST: antarctica@forgejo.dev.nerds.run
   hydra-setup:
     cmds:
       - echo Todo!

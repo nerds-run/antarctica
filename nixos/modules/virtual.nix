@@ -22,7 +22,16 @@ in
         dockerCompat = !(config.virtualisation.docker.enable);
         defaultNetwork.settings.dns_enabled = true;
       };
-      docker.enable = true;
+      docker = {
+        enable = true;
+        daemon.settings = {
+          insecure-registries = [
+            "fqdn"
+            "forgejo.dev.nerds.run:3030"
+            "localhost:3030"
+          ];
+        };
+      };
       libvirtd.enable = true;
     };
   };

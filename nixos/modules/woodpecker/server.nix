@@ -4,6 +4,16 @@ let
 in
 {
   config = lib.mkIf cfg.enable {
+    antarctica.secrets.agenix = {
+      enable = true;
+      extraSecrets = {
+        woodpecker = {
+          file = ../../../secrets/woodpecker.age;
+          path = "${config.antarctica.secrets.agenix.runtimeMount}/woodpecker.env";
+        };
+      };
+    };
+  
     services.woodpecker-server = {
       enable = true;
 

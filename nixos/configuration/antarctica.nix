@@ -7,6 +7,8 @@
     ./hardware-configuration.nix
     ../modules/virtual.nix
     ../modules/impermanence.nix
+    ../modules/agenix.nix
+    ../modules/forgejo.nix
     ../modules/woodpecker/default.nix
   ];
 
@@ -14,6 +16,7 @@
     stateVersion = "24.05";
     nixos.impermanence.enable = true;
   };
+  services.qemuGuest.enable = true;
 
   boot = {
     loader.systemd-boot.enable = true;
@@ -28,28 +31,16 @@
     };
   };
 
-  age.secretsMountPoint = "/var/lib/agenix/secret-generations";
-  age.secretsDir = "/var/lib/agenix/keys";
-  age.secrets = {
-    woodpecker = {
-      file = ../../secrets/woodpecker.age;
-      path = "/run/secrets/woodpecker.env";
-    };
-    action-runner = {
-      file = ../../secrets/action-runner.age;
-      path = "/run/secrets/action-runner.env";
-    };
-  };
-    
-  services.qemuGuest.enable = true;
-
   antarctica = {
     services.woodpecker.enable = true;
+    secrets.agenix.enable = true;
+    services.forgejo.enable = true;
+    services.forgejo.actions.enable = true;
   };
 
   system.autoUpgrade = {
     enable = true;
-    flake = "github:nerds-run/antarctica#antarctica";
+    flake = inputs.self.outPath;
     flags = [
       "--update-input"
       "nixpkgs"
@@ -82,6 +73,8 @@
         Cockpit = "cockpit";
         VSCode = "openvscode-server";
         Forgejo = "forgejo";
+        "Gitea Actions" = "gitea-runner-antarctica";
+        "Woodpecker CI" = "woodpecker-server";
         "Docker Registry" = "docker-registry";
         "Hydra Server" = "hydra-server";
       };
@@ -103,37 +96,6 @@
     port = 3080;
     buildMachinesFiles = [ ];
     notificationSender = "hydra@antarctica";
-  };
-
-  services.forgejo = {
-    enable = true;
-    dump.enable = true;
-    dump.type = "tar.zst";
-    lfs.enable = true;
-    settings = {
-      DEFAULT.APP_NAME = "Antarctica Forgejo Service";
-      server = {
-        DOMAIN = "forgejo.dev.nerds.run";
-        HTTP_PORT = 3030;
-      };
-      webhook = {
-        ALLOWED_HOST_LIST = "external,loopback";
-      };
-    };
-  };
-
-  services.gitea-actions-runner.instances = {
-    antarctica = {
-      enable = true;
-      name = "antarctica";
-      url = config.services.forgejo.settings.server.ROOT_URL;
-      labels =
-        [
-          "debian-latest:docker://node:20-bullseye"
-          "ubuntu-latest:docker://node:20-bullseye"
-        ];
-      tokenFile = "/run/secrets/action-runner.env";
-    };
   };
 
   services.packagekit.enable = true;
@@ -189,17 +151,35 @@
       dockerfile-language-server-nodejs
     ];
   };
-
-  users = {
+  programs.zsh.enable = true;
+  users = rec {
     defaultUserShell = pkgs.nushell;
-    mutableUsers = true;
+    mutableUsers = false;
     users.antarctica = {
       isNormalUser = true;
       initialPassword = "antarctica";
       extraGroups = [ "wheel" "libvirtd" "qemu" ];
-      shell = config.users.defaultUserShell;
+      shell = pkgs.zsh;
       openssh.authorizedKeys.keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQB1RVrTnUl5JDIs19lzIJVGi60yuXB7zYCcwN/XxZ tulili@studio"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0Xc+SiOJZ9r3WR+UqeZgOaRYl3ZOTCpcbVfvIHJu3t abanna@pop-os"
+      ];
+    };
+    users.tulili = {
+      isNormalUser = true;
+      initialPassword = users.antarctica.initialPassword;
+      extraGroups = users.antarctica.extraGroups;
+      shell = defaultUserShell;
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQB1RVrTnUl5JDIs19lzIJVGi60yuXB7zYCcwN/XxZ tulili@studio"
+      ];
+    };
+    users.abanna = {
+      isNormalUser = true;
+      initialPassword = users.antarctica.initialPassword;
+      extraGroups = users.antarctica.extraGroups;
+      shell = users.antarctica.shell;
+      openssh.authorizedKeys.keys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0Xc+SiOJZ9r3WR+UqeZgOaRYl3ZOTCpcbVfvIHJu3t abanna@pop-os"
       ];
     };
@@ -233,10 +213,6 @@
       use-xdg-base-directories = true;
     };
   };
-
-  environment.systemPackages = with pkgs; [
-    fuse
-  ];
 
   nixpkgs.config.allowUnfree = true;
   virtualisation.managed.enable = true;
