@@ -12,6 +12,7 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    persist-retro.url = "github:Geometer1729/persist-retro";
     impermanence.url = "github:nix-community/impermanence";
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz";
   };
@@ -24,6 +25,7 @@
     , home-manager
     , impermanence
     , agenix
+    , persist-retro
     } @ inputs:
     let
       supportedSystems = [ "x86_64-linux" "aarch64-darwin" "x86_64-darwin" "aarch64-linux" ];
@@ -39,6 +41,7 @@
         modules = [
           inputs.disko.nixosModules.disko
           inputs.impermanence.nixosModules.impermanence
+          inputs.persist-retro.nixosModules.persist-retro
           inputs.agenix.nixosModules.default
           inputs.home-manager.nixosModules.home-manager
           (import ./nixos/disko-config.nix { inherit device; })

@@ -2,7 +2,11 @@
 , pkgs
 , config
 , ...
-}: {
+}: 
+let
+  keys.tulip = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQB1RVrTnUl5JDIs19lzIJVGi60yuXB7zYCcwN/XxZ tulili@studio";
+  keys.abanna = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0Xc+SiOJZ9r3WR+UqeZgOaRYl3ZOTCpcbVfvIHJu3t abanna@pop-os";
+in {
   imports = [
     ./hardware-configuration.nix
     ../modules/virtual.nix
@@ -98,8 +102,6 @@
     notificationSender = "hydra@antarctica";
   };
 
-  services.packagekit.enable = true;
-
   services.openssh = {
     enable = true;
     openFirewall = true;
@@ -107,7 +109,7 @@
     settings = {
       KbdInteractiveAuthentication = false;
       PasswordAuthentication = true;
-    };    
+    };
     extraConfig = ''
       AllowTcpForwarding yes
       X11Forwarding no
@@ -115,6 +117,17 @@
       AllowStreamLocalForwarding no
       AuthenticationMethods publickey
     '';
+    hostKeys = [
+      {
+        bits = 4096;
+        path = "${config.antarctica.secrets.agenix.sshdHostKeyDir}/ssh_host_rsa_key";
+        type = "rsa";
+      }
+      {
+        path = "${config.antarctica.secrets.agenix.sshdHostKeyDir}/ssh_host_ed25519_key";
+        type = "ed25519";
+      }
+    ];
   };
 
   services.cockpit = {
@@ -155,33 +168,39 @@
   users = rec {
     defaultUserShell = pkgs.nushell;
     mutableUsers = false;
-    users.antarctica = {
-      isNormalUser = true;
-      initialPassword = "antarctica";
-      extraGroups = [ "wheel" "libvirtd" "qemu" ];
-      shell = pkgs.zsh;
-      openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQB1RVrTnUl5JDIs19lzIJVGi60yuXB7zYCcwN/XxZ tulili@studio"
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0Xc+SiOJZ9r3WR+UqeZgOaRYl3ZOTCpcbVfvIHJu3t abanna@pop-os"
+    users = rec {
+      root.openssh.authorizedKeys.keys = [
+        keys.tulip
+        keys.abanna
       ];
-    };
-    users.tulili = {
-      isNormalUser = true;
-      initialPassword = users.antarctica.initialPassword;
-      extraGroups = users.antarctica.extraGroups;
-      shell = defaultUserShell;
-      openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQB1RVrTnUl5JDIs19lzIJVGi60yuXB7zYCcwN/XxZ tulili@studio"
-      ];
-    };
-    users.abanna = {
-      isNormalUser = true;
-      initialPassword = users.antarctica.initialPassword;
-      extraGroups = users.antarctica.extraGroups;
-      shell = users.antarctica.shell;
-      openssh.authorizedKeys.keys = [
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0Xc+SiOJZ9r3WR+UqeZgOaRYl3ZOTCpcbVfvIHJu3t abanna@pop-os"
-      ];
+
+      antarctica = {
+        isNormalUser = true;
+        initialPassword = "antarctica";
+        extraGroups = [ "wheel" "libvirtd" "qemu" ];
+        shell = pkgs.zsh;
+        openssh.authorizedKeys.keys = root.openssh.authorizedKeys.keys;
+      };
+
+      abanna = {
+        isNormalUser = true;
+        initialPassword = users.antarctica.initialPassword;
+        extraGroups = users.antarctica.extraGroups;
+        shell = users.antarctica.shell;
+        openssh.authorizedKeys.keys = [
+          keys.abanna
+        ];
+      };
+      
+      tulili = {
+        isNormalUser = true;
+        initialPassword = users.antarctica.initialPassword;
+        extraGroups = users.antarctica.extraGroups;
+        shell = defaultUserShell;
+        openssh.authorizedKeys.keys = [
+          keys.tulip
+        ];
+      };
     };
   };
 
@@ -229,6 +248,7 @@
     users = {
       antarctica = _: {
         imports = [
+          inputs.persist-retro.nixosModules.home-manager.persist-retro
           inputs.impermanence.nixosModules.home-manager.impermanence
           ../../home-manager/configurations/antarctica.nix
         ];

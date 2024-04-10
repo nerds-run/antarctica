@@ -2,7 +2,7 @@
 let
   cfg = config.antarctica.secrets.agenix;
 
-  secretType = with lib; types.submodule ({config, ...}: {
+  secretType = with lib; types.submodule ({ config, ... }: {
     options = {
       name = mkOption {
         type = types.str;
@@ -49,17 +49,18 @@ let
           Group of the decrypted secret.
         '';
       };
-      symlink = mkEnableOption "symlinking secrets to their destination" // {default = true;};
+      symlink = mkEnableOption "symlinking secrets to their destination" // { default = true; };
     };
   });
-  
-in {
+
+in
+{
   options.antarctica.secrets.agenix = with lib; rec {
     enable = mkEnableOption "Agenix";
-    rootDir =  mkOption rec {
+    rootDir = mkOption rec {
       description = "Root path of agenix operations";
       type = types.str;
-      default = "/var/lib/agenix/";
+      default = "/var/lib/agenix";
       example = default;
     };
     secretsDir = mkOption rec {
@@ -80,6 +81,12 @@ in {
       default = "/run/secrets";
       example = default;
     };
+    sshdHostKeyDir = mkOption rec {
+      description = "Path where host keys for SSH will be generated to";
+      type = types.str;
+      default = "${rootDir.default}/sshd";
+      example = default;
+    };
     extraSecrets = mkOption {
       type = types.attrsOf secretType;
       default = { };
@@ -91,8 +98,12 @@ in {
       };
     };
   };
-  
+
   config = lib.mkIf cfg.enable {
+    age.identityPaths = [
+      "${cfg.sshdHostKeyDir}/ssh_host_ed25519_key"
+      "${cfg.sshdHostKeyDir}/ssh_host_rsa_key"
+    ];
     age.secretsMountPoint = cfg.secretsMountPoint;
     age.secretsDir = cfg.secretsDir;
     age.secrets = lib.mkMerge [{
@@ -100,6 +111,7 @@ in {
         file = ../../secrets/action-runner.age;
         path = "/run/secrets/action-runner.env";
       };
-    } cfg.extraSecrets];
+    }
+      cfg.extraSecrets];
   };
 }

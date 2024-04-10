@@ -13,7 +13,7 @@ in
         };
       };
     };
-  
+
     services.woodpecker-server = {
       enable = true;
 
@@ -27,7 +27,7 @@ in
         WOODPECKER_GRPC_ADDR = ":${toString cfg.rpcPort}";
 
         WOODPECKER_GITEA = "true";
-        WOODPECKER_GITEA_URL = config.services.forgejo.settings.server.ROOT_URL;        
+        WOODPECKER_GITEA_URL = config.services.forgejo.settings.server.ROOT_URL;
 
         WOODPECKER_LOG_LEVEL = "debug";
       };

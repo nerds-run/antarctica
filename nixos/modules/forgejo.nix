@@ -1,8 +1,9 @@
 { config, lib, ... }:
 
-let 
+let
   cfg = config.antarctica.services.forgejo;
-in {
+in
+{
   options.antarctica.services.forgejo = with lib; {
     enable = mkEnableOption "Forgejo";
     actions = mkOption {
@@ -24,16 +25,16 @@ in {
   };
 
   config = with lib; mkIf cfg.enable rec {
-   antarctica.secrets.agenix = {
+    antarctica.secrets.agenix = {
       enable = true;
-      extraSecrets = { 
+      extraSecrets = {
         forgejo = {
           file = ../../secrets/action-runner.age;
           path = "${config.antarctica.secrets.agenix.runtimeMount}/action-runner.env";
         };
       };
-    };    
-        
+    };
+
     services.forgejo = {
       enable = true;
       dump.enable = true;
@@ -64,5 +65,5 @@ in {
         tokenFile = antarctica.secrets.agenix.extraSecrets.forgejo.path;
       };
     };
-  }; 
+  };
 }

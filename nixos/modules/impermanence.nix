@@ -59,7 +59,6 @@ in
         "/var/lib/libvirt"
         "/var/lib/docker"
         "/etc/NetworkManager/system-connections"
-        "/etc/ssh"
         config.services.kasmweb.datastorePath
         config.services.forgejo.stateDir
         config.services.dockerRegistry.storagePath
