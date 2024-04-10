@@ -120,19 +120,19 @@
     };
   };
 
-  services.gitea-actions-runner.instances = {
-    antarctica = {
-      enable = true;
-      name = "antarctica";
-      url = config.services.forgejo.settings.server.ROOT_URL;
-      labels =
-        [
-          "debian-latest:docker://node:20-bullseye"
-          "ubuntu-latest:docker://node:20-bullseye"
-        ];
-      tokenFile = "/run/secrets/action-runner.env";
-    };
-  };
+  #services.gitea-actions-runner.instances = {
+  #  antarctica = {
+  #    enable = true;
+  #    name = "antarctica";
+  #    url = config.services.forgejo.settings.server.ROOT_URL;
+  #    labels =
+  #      [
+  #        "debian-latest:docker://node:20-bullseye"
+  #        "ubuntu-latest:docker://node:20-bullseye"
+  #      ];
+  #    tokenFile = "/run/secrets/action-runner.env";
+  #  };
+  #};
 
   services.packagekit.enable = true;
 
