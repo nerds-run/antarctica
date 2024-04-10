@@ -28,16 +28,16 @@
     };
   };
 
-  age.secrets = {
-    woodpecker = {
-      file = ../../secrets/woodpecker.age;
-      path = "/run/secrets/woodpecker.env";
-    };
-    action-runner = {
-      file = ../../secrets/action-runner.age;
-      path = "/run/secrets/action-runner.env";
-    };
-  };
+  #age.secrets = {
+  #  woodpecker = {
+  #    file = ../../secrets/woodpecker.age;
+  #    path = "/run/secrets/woodpecker.env";
+  #  };
+  #  action-runner = {
+  #    file = ../../secrets/action-runner.age;
+  #    path = "/run/secrets/action-runner.env";
+  #  };
+  #};
     
   services.qemuGuest.enable = true;
 
