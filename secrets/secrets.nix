@@ -3,6 +3,6 @@ let
   systems = [ antarctica ];
 in
 {
-  "woodpecker.age".publicKeys = [ antarctica ];
-  "action-runner.age".publicKeys = [ antarctica ];
+  "woodpecker.age".publicKeys = [ antarctica ]; # WOODPECKER_AGENT_SECRET, WOODPECKER_GITEA_CLIENT, WOODPECKER_GITEA_SECRET
+  "action-runner.age".publicKeys = [ antarctica ]; # TOKEN
 }
