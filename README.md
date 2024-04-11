@@ -7,7 +7,7 @@ NixOS-based development environment for shared development in NerdsRuns VMs!
 
 This should setup a NixOS VM with a bunch of container things, VM things, and general development-related things that you can use for developing things remotely.i
 
-# Manual Intervation
+# Manual Intervention
 
 You do need to make some manual adjustements before and after rebooting into the system:
 
