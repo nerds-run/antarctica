@@ -5,7 +5,14 @@
 
 NixOS-based development environment for shared development in NerdsRuns VMs!
 
-This should setup a NixOS VM with a bunch of container things, VM things, and general development-related things that you can use for developing things remotely.
+This should setup a NixOS VM with a bunch of container things, VM things, and general development-related things that you can use for developing things remotely.i
+
+# Automatic Deployment
+
+```
+```
+
+# Manual Deployment
 
 ```shell
 git clone github.com/nerds-run/antarctica

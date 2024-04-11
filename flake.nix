@@ -57,6 +57,12 @@
         antarctica = mkSystem "antarctica" "x86_64-linux" "/dev/sda";
       };
 
+      packages = forEachSupportedSystem ({ pkgs }: rec {
+        default = task; 
+        task = pkgs.writeShellScriptBin "go-task-runner" ''
+          ${pkgs.go-task}/bin/task -t ${./Taskfile.yaml} "$@"
+        '';
+      });
       formatter = forEachSupportedSystem ({ pkgs }: pkgs.nixpkgs-fmt);
       devShells = forEachSupportedSystem ({ pkgs }: {
         default = pkgs.mkShell {

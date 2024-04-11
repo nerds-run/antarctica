@@ -101,8 +101,8 @@ in
 
   config = lib.mkIf cfg.enable {
     age.identityPaths = [
-      "${cfg.sshdHostKeyDir}/ssh_host_ed25519_key"
-      "${cfg.sshdHostKeyDir}/ssh_host_rsa_key"
+      "/persist/system/${cfg.sshdHostKeyDir}/ssh_host_ed25519_key"
+      "/persist/system/${cfg.sshdHostKeyDir}/ssh_host_rsa_key"
     ];
     age.secretsMountPoint = cfg.secretsMountPoint;
     age.secretsDir = cfg.secretsDir;
