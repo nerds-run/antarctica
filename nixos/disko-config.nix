@@ -27,6 +27,40 @@
         };
       };
     };
+    disk.storage = {
+      device = "/deb/sdb";
+      type = "disk";
+      content = {
+        type = "gpt";
+        partitions = {
+          root = {
+            name = "store";
+            size = "100%";
+            content = {
+              type = "lvm_pv";
+              vg = "root_vg";
+            };
+          };
+        };
+      };
+    };
+    disk.storage2 = {
+      device = "/deb/sdc";
+      type = "disk";
+      content = {
+        type = "gpt";
+        partitions = {
+          root = {
+            name = "store";
+            size = "100%";
+            content = {
+              type = "lvm_pv";
+              vg = "root_vg";
+            };
+          };
+        };
+      };
+    };
     lvm_vg = {
       root_vg = {
         type = "lvm_vg";

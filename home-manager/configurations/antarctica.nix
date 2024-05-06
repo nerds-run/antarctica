@@ -2,9 +2,7 @@
 , ...
 }: {
   imports = [
-    ../modules/clitools.nix
-    ../modules/devtools.nix
-    ../modules/impermanence.nix
+    ../modules
   ];
 
   programs = {

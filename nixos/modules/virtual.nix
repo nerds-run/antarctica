@@ -10,10 +10,6 @@ in
   options.virtualisation.managed.enable = lib.mkEnableOption "virtual";
 
   config = mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      quickemu
-    ];
-
     virtualisation = {
       podman = {
         enable = true;

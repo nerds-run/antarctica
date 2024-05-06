@@ -9,11 +9,7 @@ let
 in {
   imports = [
     ./hardware-configuration.nix
-    ../modules/virtual.nix
-    ../modules/impermanence.nix
-    ../modules/agenix.nix
-    ../modules/forgejo.nix
-    ../modules/woodpecker/default.nix
+    ../modules
   ];
 
   system = {
@@ -40,6 +36,7 @@ in {
     secrets.agenix.enable = true;
     services.forgejo.enable = true;
     services.forgejo.actions.enable = true;
+    services.sshx.enable = true;
   };
 
   system.autoUpgrade = {
@@ -80,6 +77,7 @@ in {
         "Gitea Actions" = "gitea-runner-antarctica";
         "Woodpecker CI" = "woodpecker-server";
         "Docker Registry" = "docker-registry";
+        "SSHX server" = "sshx-server";
         "Hydra Server" = "hydra-server";
       };
     };
@@ -164,7 +162,6 @@ in {
       dockerfile-language-server-nodejs
     ];
   };
-  programs.zsh.enable = true;
   users = rec {
     defaultUserShell = pkgs.nushell;
     mutableUsers = false;
@@ -178,7 +175,7 @@ in {
         isNormalUser = true;
         initialPassword = "antarctica";
         extraGroups = [ "wheel" "libvirtd" "qemu" ];
-        shell = pkgs.zsh;
+        shell = pkgs.nushell;
         openssh.authorizedKeys.keys = root.openssh.authorizedKeys.keys;
       };
 

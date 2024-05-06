@@ -2,6 +2,7 @@
 {
   imports = [
     ./agent-docker.nix
+    ./agent-exec.nix
     ./server.nix
   ];
 
@@ -9,7 +10,7 @@
     enable = mkEnableOption "Woodpecker CI";
     runners = mkOption {
       type = with types; listOf (enum [ "exec" "docker" ]);
-      default = [ "docker" ];
+      default = [ "exec" "docker" ];
       example = [ "exec" "docker" ];
       description = "Types of runners to enable";
     };

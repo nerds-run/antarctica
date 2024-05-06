@@ -32,7 +32,9 @@ in
       after = [ "docker.socket" ]; # Needs the socket to be available
       # might break deployment
       restartIfChanged = false;
+      
       serviceConfig = {
+        User = "root";
         BindPaths = [
           "/var/run/docker.sock"
         ];

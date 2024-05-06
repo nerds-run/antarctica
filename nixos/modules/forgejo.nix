@@ -37,7 +37,7 @@ in
 
     services.forgejo = {
       enable = true;
-      dump.enable = true;
+      dump.enable = false;
       dump.type = "tar.zst";
       lfs.enable = true;
       settings = {
@@ -46,8 +46,11 @@ in
           DOMAIN = "forgejo.dev.nerds.run";
           HTTP_PORT = cfg.port;
         };
+        actions = {
+          DEFAULT_ACTIONS_URL = "https://github.com";
+        };
         webhook = {
-          ALLOWED_HOST_LIST = "external,loopback";
+          ALLOWED_HOST_LIST = "external,loopback,woodpecker.dev.nerds.run";
         };
       };
     };
@@ -57,10 +60,28 @@ in
         enable = true;
         name = "antarctica";
         url = config.services.forgejo.settings.server.ROOT_URL;
+        settings = {
+          log = {
+            level = "debug";
+          };
+          options = "-v /var/run/podman/podman.sock:/var/run/podman/podman.sock";
+          runner = {
+            capacity = 5;
+            timeout = "45m";
+          };
+          container = {
+            privileged = true;
+            valid_volumes = ["*"];
+            force_pull = false;
+          };
+        };
         labels =
           [
-            "debian-latest:docker://node:20-bullseye"
-            "ubuntu-latest:docker://node:20-bullseye"
+            "debian-latest:docker://catthehacker/ubuntu:act-latest"
+            "ubuntu-latest:docker://catthehacker/ubuntu:act-latest"
+            "ubuntu-22.04:docker://catthehacker/ubuntu:act-latest"
+            "ubuntu-20.04:docker://catthehacker/ubuntu:act-latest"
+            "ubuntu-18.04:docker://catthehacker/ubuntu:act-latest"
           ];
         tokenFile = antarctica.secrets.agenix.extraSecrets.forgejo.path;
       };

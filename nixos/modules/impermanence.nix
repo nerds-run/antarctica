@@ -57,6 +57,8 @@ in
         "/var/lib/machines"
         "/var/lib/agenix"
         "/var/lib/libvirt"
+        "/var/lib/woodpecker-server"
+        "/var/lib/private/woodpecker-server"
         "/var/lib/docker"
         "/etc/NetworkManager/system-connections"
         config.services.kasmweb.datastorePath
