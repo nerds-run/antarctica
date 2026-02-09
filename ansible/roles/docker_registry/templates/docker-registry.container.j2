@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Docker Registry v2 (Podman Quadlet)
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+ContainerName={{ docker_registry_container_name }}
+Image={{ docker_registry_image }}
+AutoUpdate=registry
+PublishPort=0.0.0.0:{{ docker_registry_port }}:5000
+Volume={{ docker_registry_data_dir }}:/var/lib/registry:Z
+Environment=REGISTRY_STORAGE_DELETE_ENABLED={{ docker_registry_delete_enabled | lower }}
+Network={{ container_runtime_network_name | default('antarctica') }}
+
+[Service]
+Restart=always
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target default.target

@@ -1,0 +1,27 @@
+---
+- name: Verify docker_registry role
+  hosts: all
+  become: true
+  tasks:
+    - name: Check docker-registry quadlet file exists
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/docker-registry.container
+      register: docker_registry_quadlet
+
+    - name: Assert docker-registry quadlet exists
+      ansible.builtin.assert:
+        that:
+          - docker_registry_quadlet.stat.exists
+        fail_msg: "Docker registry quadlet file does not exist"
+
+    - name: Check registry data directory exists
+      ansible.builtin.stat:
+        path: /data/registry
+      register: docker_registry_data
+
+    - name: Assert registry data directory exists
+      ansible.builtin.assert:
+        that:
+          - docker_registry_data.stat.exists
+          - docker_registry_data.stat.isdir
+        fail_msg: "/data/registry does not exist"

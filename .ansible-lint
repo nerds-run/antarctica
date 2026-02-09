@@ -1,0 +1,36 @@
+---
+profile: production
+
+exclude_paths:
+  - .git/
+  - .cache/
+  - .venv/
+  - collections/
+  - molecule/*/collections/
+  - infra/
+  - Taskfile.yaml
+
+enable_list:
+  - args
+  - empty-string-compare
+  - no-log-password
+  - no-same-owner
+  - name[casing]
+  - name[template]
+  - galaxy[version-incorrect]
+
+warn_list:
+  - experimental
+
+skip_list: []
+
+kinds:
+  - playbook: "ansible/playbooks/*.yml"
+  - tasks: "ansible/roles/*/tasks/*.yml"
+  - vars: "ansible/roles/*/vars/*.yml"
+  - vars: "ansible/roles/*/defaults/*.yml"
+  - meta: "ansible/roles/*/meta/*.yml"
+  - handlers: "ansible/roles/*/handlers/*.yml"
+
+use_default_rules: true
+offline: false

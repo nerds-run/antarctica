@@ -1,0 +1,8 @@
+---
+- name: Antarctica base server configuration
+  hosts: antarctica
+  become: true
+
+  roles:
+    - role: base
+      tags: [base]

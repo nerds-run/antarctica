@@ -1,0 +1,14 @@
+---
+- name: Daemon reload sshx
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart sshx
+  ansible.builtin.systemd:
+    name: sshx
+    state: restarted
+
+- name: Restart sshx-redis
+  ansible.builtin.systemd:
+    name: sshx-redis
+    state: restarted

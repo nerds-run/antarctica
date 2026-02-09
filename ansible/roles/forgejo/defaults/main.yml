@@ -1,0 +1,32 @@
+---
+forgejo_image: codeberg.org/forgejo/forgejo:latest
+forgejo_domain: forgejo.dev.nerds.run
+forgejo_http_port: 3000
+forgejo_ssh_port: 2222
+forgejo_data_dir: /data/forgejo
+forgejo_config_dir: /etc/forgejo
+forgejo_container_name: forgejo
+
+forgejo_lfs_enabled: true
+forgejo_default_actions_url: "https://github.com"
+forgejo_webhook_allowed_hosts: "external,loopback,woodpecker.dev.nerds.run"
+
+# Database
+forgejo_postgresql_container_name: postgresql
+forgejo_postgresql_db: woodpecker
+forgejo_postgresql_user: woodpecker
+
+# Gitea Actions Runner
+forgejo_actions_runner_image: gitea/act_runner:latest
+forgejo_actions_runner_container_name: actions-runner
+forgejo_actions_runner_name: antarctica
+forgejo_actions_runner_capacity: 5
+forgejo_actions_runner_timeout: 45m
+forgejo_actions_runner_config_dir: /etc/forgejo
+
+# 1Password references
+forgejo_op_secret_key: "op://Antarctica/forgejo/secret-key"
+forgejo_op_internal_token: "op://Antarctica/forgejo/internal-token"
+forgejo_op_oauth2_jwt_secret: "op://Antarctica/forgejo/oauth2-jwt-secret"
+forgejo_op_lfs_jwt_secret: "op://Antarctica/forgejo/lfs-jwt-secret"
+forgejo_op_action_runner_token: "op://Antarctica/forgejo/action-runner-token"

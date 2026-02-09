@@ -1,0 +1,41 @@
+---
+- name: Verify caddy role
+  hosts: all
+  become: true
+  tasks:
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Check caddy is installed
+      ansible.builtin.command: caddy version
+      register: caddy_version
+      changed_when: false
+
+    - name: Assert caddy is available
+      ansible.builtin.assert:
+        that:
+          - caddy_version.rc == 0
+        fail_msg: "Caddy is not installed"
+
+    - name: Check Caddyfile exists
+      ansible.builtin.stat:
+        path: /etc/caddy/Caddyfile
+      register: caddy_caddyfile
+
+    - name: Assert Caddyfile exists
+      ansible.builtin.assert:
+        that:
+          - caddy_caddyfile.stat.exists
+        fail_msg: "Caddyfile does not exist"
+
+    - name: Check caddy data directory exists
+      ansible.builtin.stat:
+        path: /data/caddy
+      register: caddy_data
+
+    - name: Assert caddy data directory exists
+      ansible.builtin.assert:
+        that:
+          - caddy_data.stat.exists
+          - caddy_data.stat.isdir
+        fail_msg: "/data/caddy does not exist"

@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+
+[registries.search]
+registries = [{% for reg in container_runtime_unqualified_registries %}'{{ reg }}'{% if not loop.last %}, {% endif %}{% endfor %}]
+
+[registries.insecure]
+registries = []
+
+[registries.block]
+registries = []

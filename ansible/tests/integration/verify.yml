@@ -1,0 +1,121 @@
+---
+- name: Verify - Full Stack Integration
+  hosts: all
+  become: true
+  tasks:
+    - name: Check Podman is available
+      ansible.builtin.command: podman --version
+      register: podman_check
+      changed_when: false
+
+    - name: Assert Podman is installed
+      ansible.builtin.assert:
+        that:
+          - podman_check.rc == 0
+        fail_msg: "Podman is not available"
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Check Caddy service exists
+      ansible.builtin.assert:
+        that:
+          - "'caddy.service' in ansible_facts.services"
+        fail_msg: "Caddy service not found"
+
+    - name: Check all Quadlet container files exist
+      ansible.builtin.stat:
+        path: "/etc/containers/systemd/{{ item }}.container"
+      register: quadlet_files
+      loop:
+        - postgresql
+        - forgejo
+        - woodpecker-server
+        - woodpecker-agent
+
+    - name: Assert all Quadlet files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "Quadlet file {{ item.item }}.container does not exist"
+      loop: "{{ quadlet_files.results }}"
+
+    - name: Verify no port conflicts in config
+      ansible.builtin.command: grep -r 'PublishPort' /etc/containers/systemd/
+      register: port_config
+      changed_when: false
+      failed_when: false
+
+    - name: Check persistent data directories
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: data_dirs
+      loop:
+        - /data/forgejo
+        - /data/woodpecker
+        - /data/postgresql
+        - /data/caddy
+
+    - name: Assert data directories exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.isdir
+        fail_msg: "Data directory {{ item.item }} does not exist"
+      loop: "{{ data_dirs.results }}"
+
+    - name: Check nftables ruleset
+      ansible.builtin.command: nft list ruleset
+      register: firewall_rules
+      changed_when: false
+      failed_when: false
+
+    - name: Check Caddyfile has reverse proxy entries
+      ansible.builtin.command: grep -c 'reverse_proxy' /etc/caddy/Caddyfile
+      register: caddy_proxies
+      changed_when: false
+      failed_when: false
+
+    - name: Assert Caddyfile has proxy entries
+      ansible.builtin.assert:
+        that:
+          - caddy_proxies.stdout | int >= 2
+        fail_msg: "Caddyfile should have at least 2 reverse_proxy entries"
+
+    - name: Check env files for services
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: env_files
+      loop:
+        - /etc/forgejo/env
+        - /etc/woodpecker-server/env
+        - /etc/woodpecker-agent/env
+
+    - name: Assert env files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "Env file {{ item.item }} does not exist"
+      loop: "{{ env_files.results }}"
+
+    - name: Check dev tools are installed
+      ansible.builtin.command: "{{ item }}"
+      register: tool_checks
+      changed_when: false
+      failed_when: false
+      loop:
+        - git --version
+        - jq --version
+
+    - name: Display integration verification summary
+      ansible.builtin.debug:
+        msg: |
+          ==========================================
+          Integration Verification Complete
+          ==========================================
+          Podman:          {{ 'OK' if podman_check.rc == 0 else 'FAIL' }}
+          Caddy:           {{ 'OK' if 'caddy.service' in ansible_facts.services else 'FAIL' }}
+          Quadlet files:   {{ quadlet_files.results | selectattr('stat.exists') | list | length }}/4
+          Data dirs:       {{ data_dirs.results | selectattr('stat.exists') | list | length }}/4
+          Env files:       {{ env_files.results | selectattr('stat.exists') | list | length }}/3
+          ==========================================

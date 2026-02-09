@@ -1,0 +1,57 @@
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: ${MOLECULE_PROJECT_DIRECTORY}/../../requirements.yml
+
+driver:
+  name: podman
+
+platforms:
+  - name: "molecule-openvscode-debian12"
+    image: "docker.io/geerlingguy/docker-debian12-ansible:latest"
+    pre_build_image: true
+    privileged: true
+    command: /usr/sbin/init
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    tmpfs:
+      - /run
+      - /tmp
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      callbacks_enabled: timer, profile_tasks
+      stdout_callback: yaml
+    diff:
+      always: true
+  playbooks:
+    prepare: prepare.yml
+    converge: converge.yml
+    verify: verify.yml
+  inventory:
+    group_vars:
+      all:
+        ansible_python_interpreter: /usr/bin/python3
+
+verifier:
+  name: ansible
+
+scenario:
+  name: default
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy

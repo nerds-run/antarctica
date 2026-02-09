@@ -1,0 +1,17 @@
+---
+galaxy_info:
+  role_name: caddy
+  author: nerdsrun
+  description: "Caddy reverse proxy with automatic HTTPS"
+  license: BSD-3-Clause
+  min_ansible_version: "2.17"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+  galaxy_tags:
+    - caddy
+    - reverseproxy
+    - https
+dependencies:
+  - role: base

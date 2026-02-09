@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=SSHX Server (Podman Quadlet)
+After=network-online.target sshx-redis.service
+Wants=network-online.target
+Requires=sshx-redis.service
+
+[Container]
+ContainerName={{ sshx_container_name }}
+Image={{ sshx_image }}
+AutoUpdate=registry
+PublishPort=0.0.0.0:{{ sshx_http_port }}:8051
+Environment=SSHX_LISTEN_ADDRESS={{ sshx_listen_address }}
+Environment=SSHX_REDIS_URL=redis://{{ sshx_redis_container_name }}:6379
+Network={{ container_runtime_network_name | default('antarctica') }}
+
+[Service]
+Restart=on-failure
+Type=exec
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target default.target

@@ -1,0 +1,9 @@
+---
+- name: Daemon reload quadlet
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart postgresql
+  ansible.builtin.systemd:
+    name: postgresql
+    state: restarted

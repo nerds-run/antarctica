@@ -1,0 +1,77 @@
+---
+- name: Install podman and buildah
+  ansible.builtin.apt:
+    name:
+      - podman
+      - buildah
+      - slirp4netns
+      - crun
+      - fuse-overlayfs
+    state: present
+
+# -- Registries config --
+- name: Deploy registries.conf
+  ansible.builtin.template:
+    src: registries.conf.j2
+    dest: /etc/containers/registries.conf
+    mode: "0644"
+
+# -- Storage config --
+- name: Deploy storage.conf
+  ansible.builtin.template:
+    src: storage.conf.j2
+    dest: /etc/containers/storage.conf
+    mode: "0644"
+
+# -- Container data directories --
+- name: Create container data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ container_runtime_data_dirs }}"
+
+# -- Quadlet directory --
+- name: Ensure systemd quadlet directory exists
+  ansible.builtin.file:
+    path: /etc/containers/systemd
+    state: directory
+    mode: "0755"
+
+# -- Container network --
+- name: Check if podman network exists
+  ansible.builtin.command:
+    cmd: "podman network inspect {{ container_runtime_network_name }}"
+  register: container_runtime_network_check
+  changed_when: false
+  failed_when: false
+
+- name: Create podman network
+  ansible.builtin.command:
+    cmd: "podman network create {{ container_runtime_network_name }}"
+  when: container_runtime_network_check.rc != 0
+  changed_when: true
+
+# -- Podman socket for API access --
+- name: Enable podman socket
+  ansible.builtin.systemd:
+    name: podman.socket
+    enabled: true
+    state: started
+
+# -- Podman auto-update timer --
+- name: Enable podman auto-update timer
+  ansible.builtin.systemd:
+    name: podman-auto-update.timer
+    enabled: true
+    state: started
+
+# -- Container prune cron --
+- name: Set up container prune cron job
+  ansible.builtin.cron:
+    name: "Podman container prune"
+    minute: "0"
+    hour: "3"
+    weekday: "0"
+    job: "podman system prune -f --volumes 2>&1 | logger -t podman-prune"
+    user: root

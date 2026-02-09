@@ -1,0 +1,36 @@
+#!/usr/sbin/nft -f
+# {{ ansible_managed }}
+
+flush ruleset
+
+table inet filter {
+    chain input {
+        type filter hook input priority 0; policy drop;
+
+        # Loopback
+        iif "lo" accept
+
+        # Established / related
+        ct state established,related accept
+
+        # Drop invalid
+        ct state invalid drop
+
+        # ICMP (ping)
+        ip protocol icmp accept
+        ip6 nexthdr icmpv6 accept
+
+        # Allowed TCP ports
+{% for port in base_firewall_allowed_tcp_ports %}
+        tcp dport {{ port }} accept
+{% endfor %}
+    }
+
+    chain forward {
+        type filter hook forward priority 0; policy drop;
+    }
+
+    chain output {
+        type filter hook output priority 0; policy accept;
+    }
+}

@@ -1,0 +1,125 @@
+---
+- name: Validate Antarctica deployment
+  hosts: antarctica
+  become: true
+  tasks:
+    - name: Check Caddy service is running
+      ansible.builtin.systemd:
+        name: caddy
+        state: started
+      check_mode: true
+
+    - name: Check PostgreSQL container is running
+      ansible.builtin.command:
+        cmd: >-
+          podman ps --filter name=postgresql
+          --format '{{ '{{' }}.Status{{ '}}' }}'
+      register: pg_status
+      changed_when: false
+      failed_when: "'Up' not in pg_status.stdout"
+
+    - name: Check Forgejo container is running
+      ansible.builtin.command:
+        cmd: >-
+          podman ps --filter name=forgejo
+          --format '{{ '{{' }}.Status{{ '}}' }}'
+      register: forgejo_status
+      changed_when: false
+      failed_when: "'Up' not in forgejo_status.stdout"
+
+    - name: Check Woodpecker server container is running
+      ansible.builtin.command:
+        cmd: >-
+          podman ps --filter name=woodpecker-server
+          --format '{{ '{{' }}.Status{{ '}}' }}'
+      register: wp_server_status
+      changed_when: false
+      failed_when: "'Up' not in wp_server_status.stdout"
+
+    - name: Check Woodpecker agent container is running
+      ansible.builtin.command:
+        cmd: >-
+          podman ps --filter name=woodpecker-agent
+          --format '{{ '{{' }}.Status{{ '}}' }}'
+      register: wp_agent_status
+      changed_when: false
+      failed_when: "'Up' not in wp_agent_status.stdout"
+
+    - name: Check Forgejo HTTP is responding
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ forgejo_http_port | default(3000) }}"
+        status_code: 200
+        timeout: 10
+      register: forgejo_http
+      retries: 3
+      delay: 5
+
+    - name: Check Woodpecker HTTP is responding
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ woodpecker_http_port | default(3040) }}"
+        status_code: 200
+        timeout: 10
+      register: woodpecker_http
+      retries: 3
+      delay: 5
+
+    - name: Check Podman is available
+      ansible.builtin.command: podman info --format json
+      changed_when: false
+
+    - name: Check persistent data directories exist
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: data_dirs
+      failed_when: not data_dirs.stat.exists
+      loop:
+        - /data/forgejo
+        - /data/woodpecker
+        - /data/postgresql
+        - /data/caddy
+        - /data/registry
+        - /data/sshx
+
+    - name: Check nftables is active
+      ansible.builtin.systemd:
+        name: nftables
+        state: started
+      check_mode: true
+
+    - name: Check SSH is listening
+      ansible.builtin.wait_for:
+        port: 22
+        timeout: 5
+
+    - name: Check Forgejo SSH port is listening
+      ansible.builtin.wait_for:
+        port: "{{ forgejo_ssh_port | default(2222) }}"
+        timeout: 5
+
+    - name: Check HTTPS endpoints via Caddy
+      ansible.builtin.uri:
+        url: "https://{{ item }}"
+        status_code: [200, 302]
+        validate_certs: false
+        timeout: 10
+      loop:
+        - "{{ forgejo_domain | default('forgejo.dev.nerds.run') }}"
+        - "{{ woodpecker_domain | default('woodpecker.dev.nerds.run') }}"
+      retries: 3
+      delay: 5
+      failed_when: false  # May fail if DNS not configured yet
+
+    - name: Display validation summary
+      ansible.builtin.debug:
+        msg: |
+          ========================================
+          Antarctica Validation Summary
+          ========================================
+          Caddy:            OK
+          PostgreSQL:       {{ 'OK' if pg_status.rc == 0 else 'FAIL' }}
+          Forgejo:          {{ 'OK' if forgejo_status.rc == 0 else 'FAIL' }}
+          Woodpecker:       {{ 'OK' if wp_server_status.rc == 0 else 'FAIL' }}
+          WP Agent:         {{ 'OK' if wp_agent_status.rc == 0 else 'FAIL' }}
+          Data dirs:        OK
+          SSH:              OK
+          ========================================

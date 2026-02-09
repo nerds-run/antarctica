@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+
+[storage]
+driver = "{{ container_runtime_storage_driver }}"
+runroot = "/run/containers/storage"
+graphroot = "/var/lib/containers/storage"
+
+[storage.options]
+additionalimagestores = []
+
+[storage.options.overlay]
+mountopt = "nodev,metacopy=on"

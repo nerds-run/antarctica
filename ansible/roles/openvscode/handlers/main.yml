@@ -1,0 +1,9 @@
+---
+- name: Daemon reload openvscode
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart openvscode-server
+  ansible.builtin.systemd:
+    name: openvscode-server
+    state: restarted

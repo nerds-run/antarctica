@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Forgejo Git Server (Podman Quadlet)
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+
+[Container]
+ContainerName={{ forgejo_container_name }}
+Image={{ forgejo_image }}
+AutoUpdate=registry
+PublishPort=127.0.0.1:{{ forgejo_http_port }}:3000
+PublishPort=0.0.0.0:{{ forgejo_ssh_port }}:22
+Volume={{ forgejo_data_dir }}:/data:Z
+EnvironmentFile={{ forgejo_config_dir }}/forgejo.env
+Network={{ container_runtime_network_name | default('antarctica') }}
+
+[Service]
+Restart=always
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target default.target

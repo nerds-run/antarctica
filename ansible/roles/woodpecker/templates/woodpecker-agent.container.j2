@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Woodpecker CI Agent (Podman Quadlet)
+After=network-online.target woodpecker-server.service
+Wants=network-online.target
+Requires=woodpecker-server.service
+
+[Container]
+ContainerName={{ woodpecker_agent_container_name }}
+Image={{ woodpecker_agent_image }}
+AutoUpdate=registry
+Volume=/run/podman/podman.sock:/var/run/docker.sock:Z
+EnvironmentFile={{ woodpecker_config_dir }}/woodpecker-agent.env
+Network={{ container_runtime_network_name | default('antarctica') }}
+
+[Service]
+Restart=always
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target default.target

@@ -1,0 +1,8 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  tasks:
+    - name: "Include role sshx"
+      ansible.builtin.include_role:
+        name: "sshx"

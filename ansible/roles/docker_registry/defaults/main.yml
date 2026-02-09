@@ -1,0 +1,6 @@
+---
+docker_registry_image: docker.io/library/registry:2
+docker_registry_port: 5000
+docker_registry_data_dir: /data/registry
+docker_registry_container_name: docker-registry
+docker_registry_delete_enabled: true

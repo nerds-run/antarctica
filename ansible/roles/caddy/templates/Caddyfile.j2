@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+
+{{ caddy_forgejo_domain }} {
+    reverse_proxy localhost:{{ caddy_forgejo_http_port }}
+}
+
+{{ caddy_woodpecker_domain }} {
+    reverse_proxy localhost:{{ caddy_woodpecker_http_port }}
+}

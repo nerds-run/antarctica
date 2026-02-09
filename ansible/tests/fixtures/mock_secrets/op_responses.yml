@@ -1,0 +1,11 @@
+---
+mock_secrets:
+  "op://Infrastructure/antiarctica_postgresql/password": "test-db-password-12345"
+  "op://Infrastructure/antiarctica_woodpecker/agent-secret": "test-agent-secret-67890"
+  "op://Infrastructure/antiarctica_woodpecker/gitea-client": "test-gitea-client-abcde"
+  "op://Infrastructure/antiarctica_woodpecker/gitea-secret": "test-gitea-secret-fghij"
+  "op://Infrastructure/antiarctica_forgejo/secret-key": "test-forgejo-secret-key"
+  "op://Infrastructure/antiarctica_forgejo/internal-token": "test-forgejo-internal-token"
+  "op://Infrastructure/antiarctica_forgejo/oauth2-jwt-secret": "test-forgejo-oauth2-jwt"
+  "op://Infrastructure/antiarctica_forgejo/lfs-jwt-secret": "test-forgejo-lfs-jwt"
+  "op://Infrastructure/antiarctica_forgejo/action-runner-token": "test-runner-token-klmno"

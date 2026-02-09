@@ -1,0 +1,8 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  tasks:
+    - name: "Include role container_runtime"
+      ansible.builtin.include_role:
+        name: "container_runtime"

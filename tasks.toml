@@ -1,0 +1,159 @@
+# Deployment tasks
+[tasks.deploy]
+description = "Full deployment: Pulumi infra + Ansible config"
+depends = ["deploy:infra", "deploy:configure"]
+
+[tasks."deploy:infra"]
+description = "Provision infrastructure with Pulumi"
+dir = "infra"
+run = """
+pulumi up --yes --stack dev
+pulumi stack output --json --stack dev > ../ansible/inventory/pulumi_output.json
+"""
+
+[tasks."deploy:configure"]
+description = "Configure server with Ansible"
+dir = "ansible"
+run = "ansible-playbook playbooks/site.yml -i inventory/"
+
+[tasks."deploy:forgejo"]
+description = "Deploy only Forgejo changes"
+dir = "ansible"
+run = "ansible-playbook playbooks/forgejo.yml -i inventory/"
+
+[tasks."deploy:woodpecker"]
+description = "Deploy only Woodpecker changes"
+dir = "ansible"
+run = "ansible-playbook playbooks/woodpecker.yml -i inventory/"
+
+[tasks."deploy:caddy"]
+description = "Deploy only Caddy changes"
+dir = "ansible"
+run = "ansible-playbook playbooks/caddy.yml -i inventory/"
+
+[tasks."deploy:base"]
+description = "Deploy only base OS changes"
+dir = "ansible"
+run = "ansible-playbook playbooks/base.yml -i inventory/"
+
+[tasks."deploy:validate"]
+description = "Run validation checks"
+dir = "ansible"
+run = "ansible-playbook playbooks/validate.yml -i inventory/"
+
+[tasks."deploy:check"]
+description = "Dry-run deployment (check mode)"
+dir = "ansible"
+run = "ansible-playbook playbooks/site.yml --check --diff -i inventory/"
+
+[tasks."deploy:destroy"]
+description = "Tear down infrastructure (DANGEROUS)"
+dir = "infra"
+run = "pulumi destroy --yes --stack dev"
+
+[tasks.bootstrap]
+description = "First-time deployment from scratch"
+run = "./bootstrap.sh"
+
+# Setup
+[tasks.setup]
+description = "Initialize development environment"
+run = """
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+ansible-galaxy install -r ansible/requirements.yml
+pre-commit install
+echo "Development environment ready!"
+"""
+
+# Linting
+[tasks.lint]
+description = "Run all linters"
+depends = ["lint:yaml", "lint:ansible"]
+
+[tasks."lint:yaml"]
+description = "Run yamllint"
+run = "yamllint -c .yamllint ansible/roles/ ansible/playbooks/ ansible/inventory/ ansible/tests/ ansible/requirements.yml .ansible-lint .woodpecker.yml .pre-commit-config.yaml"
+
+[tasks."lint:ansible"]
+description = "Run ansible-lint"
+run = "ansible-lint --profile production ansible/"
+
+[tasks."lint:fix"]
+description = "Auto-fix linting issues where possible"
+run = "ansible-lint --fix ansible/"
+
+[tasks."lint:go"]
+description = "Lint Pulumi Go code"
+dir = "infra"
+run = "go vet ./..."
+
+# Testing
+[tasks.test]
+description = "Run all tests (lint + molecule)"
+depends = ["lint", "test:roles"]
+
+[tasks."test:roles"]
+description = "Run Molecule tests for all roles"
+run = """
+for role in ansible/roles/*/; do
+  role_name=$(basename "$role")
+  if [ -d "$role/molecule/default" ]; then
+    echo "==> Testing role: $role_name"
+    (cd "$role" && molecule test) || exit 1
+  fi
+done
+"""
+
+[tasks."test:role"]
+description = "Run Molecule test for a single role (usage: mise run test:role base)"
+run = "cd ansible/roles/${1} && molecule test"
+
+[tasks."test:converge"]
+description = "Converge a role (no destroy - fast iteration)"
+run = "cd ansible/roles/${1} && molecule converge"
+
+[tasks."test:verify"]
+description = "Run verify step only (after converge)"
+run = "cd ansible/roles/${1} && molecule verify"
+
+[tasks."test:destroy"]
+description = "Destroy test instances for a role"
+run = "cd ansible/roles/${1} && molecule destroy"
+
+[tasks."test:login"]
+description = "SSH into a running Molecule instance for debugging"
+run = "cd ansible/roles/${1} && molecule login"
+
+[tasks."test:integration"]
+description = "Run full-stack integration tests"
+run = "cd ansible/tests/integration && molecule test"
+
+[tasks."test:idempotence"]
+description = "Run only idempotence check for a role"
+run = """
+cd ansible/roles/${1}
+molecule converge
+molecule idempotence
+"""
+
+# Development workflow
+[tasks.dev]
+description = "Start development loop for a role"
+run = """
+echo "==> Converging role: ${1}"
+cd ansible/roles/${1}
+molecule converge
+echo ""
+echo "Instance is running. Iterate with:"
+echo "  mise run test:converge ${1}   # re-apply role"
+echo "  mise run test:verify ${1}     # check state"
+echo "  mise run test:login ${1}      # SSH in"
+echo "  mise run test:destroy ${1}    # tear down"
+"""
+
+# CI simulation
+[tasks."ci:local"]
+description = "Run the full CI pipeline locally"
+depends = ["lint", "test:roles", "test:integration"]

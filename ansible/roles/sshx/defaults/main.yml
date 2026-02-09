@@ -1,0 +1,12 @@
+---
+sshx_image: ghcr.io/ekzhang/sshx:latest
+sshx_http_port: 8051
+sshx_redis_port: 5090
+sshx_data_dir: /data/sshx
+sshx_container_name: sshx
+sshx_listen_address: "0.0.0.0"
+sshx_redis_url: "redis://127.0.0.1:{{ sshx_redis_port }}"
+
+# Redis sidecar
+sshx_redis_image: docker.io/library/redis:7-alpine
+sshx_redis_container_name: sshx-redis

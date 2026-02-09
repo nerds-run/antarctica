@@ -1,3 +1,30 @@
 result*
 *.raw
 *.qcow2
+
+# Pulumi
+infra/go.sum
+infra/.pulumi/
+
+# Ansible
+ansible/inventory/pulumi_output.json
+ansible/*.retry
+ansible/collections/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Molecule
+.cache/
+
+# Ansible facts cache
+/tmp/ansible_facts/
+
+# 1Password
+.op/
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,26 @@
+---
+- name: Verify sshx role
+  hosts: all
+  become: true
+  tasks:
+    - name: Check sshx quadlet file exists
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/sshx.container
+      register: sshx_quadlet
+
+    - name: Assert sshx quadlet exists
+      ansible.builtin.assert:
+        that:
+          - sshx_quadlet.stat.exists
+        fail_msg: "SSHX quadlet file does not exist"
+
+    - name: Check sshx-redis quadlet file exists
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/sshx-redis.container
+      register: sshx_redis_quadlet
+
+    - name: Assert sshx-redis quadlet exists
+      ansible.builtin.assert:
+        that:
+          - sshx_redis_quadlet.stat.exists
+        fail_msg: "SSHX Redis quadlet file does not exist"

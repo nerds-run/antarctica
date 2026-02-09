@@ -1,0 +1,38 @@
+# {{ ansible_managed }}
+# Antarctica SSH server configuration
+
+Port 22
+AddressFamily any
+ListenAddress 0.0.0.0
+ListenAddress ::
+
+# Host keys
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+
+# Authentication
+PermitRootLogin no
+PubkeyAuthentication yes
+AuthenticationMethods publickey
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+KbdInteractiveAuthentication no
+UsePAM yes
+
+# Security
+MaxAuthTries 3
+MaxSessions 10
+LoginGraceTime 30
+
+# Forwarding
+AllowTcpForwarding yes
+X11Forwarding no
+AllowAgentForwarding no
+AllowStreamLocalForwarding no
+
+# No SFTP
+# Subsystem sftp /usr/lib/openssh/sftp-server
+
+# Misc
+PrintMotd yes
+AcceptEnv LANG LC_*

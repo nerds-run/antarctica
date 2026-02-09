@@ -1,0 +1,38 @@
+---
+- name: Verify forgejo role
+  hosts: all
+  become: true
+  tasks:
+    - name: Check forgejo quadlet file exists
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/forgejo.container
+      register: forgejo_verify_quadlet
+
+    - name: Assert forgejo quadlet exists
+      ansible.builtin.assert:
+        that:
+          - forgejo_verify_quadlet.stat.exists
+        fail_msg: "Forgejo quadlet file does not exist"
+
+    - name: Check forgejo env file exists
+      ansible.builtin.stat:
+        path: /etc/forgejo/env
+      register: forgejo_verify_env
+
+    - name: Assert forgejo env file exists
+      ansible.builtin.assert:
+        that:
+          - forgejo_verify_env.stat.exists
+        fail_msg: "Forgejo env file does not exist"
+
+    - name: Check forgejo data directory exists
+      ansible.builtin.stat:
+        path: /data/forgejo
+      register: forgejo_verify_data
+
+    - name: Assert forgejo data directory exists
+      ansible.builtin.assert:
+        that:
+          - forgejo_verify_data.stat.exists
+          - forgejo_verify_data.stat.isdir
+        fail_msg: "/data/forgejo does not exist"

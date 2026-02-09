@@ -1,0 +1,72 @@
+---
+when:
+  - event: [push, pull_request]
+
+steps:
+  - name: lint-yaml
+    image: cytopia/yamllint:latest
+    commands:
+      - yamllint -c .yamllint ansible/
+
+  - name: lint-ansible
+    image: pipelinecomponents/ansible-lint:latest
+    commands:
+      - pip install ansible-core>=2.17
+      - ansible-lint --profile production ansible/
+
+  - name: test-base
+    image: quay.io/ansible/molecule:latest
+    commands:
+      - cd ansible/roles/base && molecule test
+    volumes:
+      - /run/podman/podman.sock:/var/run/docker.sock
+    depends_on:
+      - lint-yaml
+      - lint-ansible
+
+  - name: test-container-runtime
+    image: quay.io/ansible/molecule:latest
+    commands:
+      - cd ansible/roles/container_runtime && molecule test
+    volumes:
+      - /run/podman/podman.sock:/var/run/docker.sock
+    depends_on:
+      - test-base
+
+  - name: test-caddy
+    image: quay.io/ansible/molecule:latest
+    commands:
+      - cd ansible/roles/caddy && molecule test
+    volumes:
+      - /run/podman/podman.sock:/var/run/docker.sock
+    depends_on:
+      - test-base
+
+  - name: test-forgejo
+    image: quay.io/ansible/molecule:latest
+    commands:
+      - cd ansible/roles/forgejo && molecule test
+    volumes:
+      - /run/podman/podman.sock:/var/run/docker.sock
+    depends_on:
+      - test-container-runtime
+
+  - name: test-woodpecker
+    image: quay.io/ansible/molecule:latest
+    commands:
+      - cd ansible/roles/woodpecker && molecule test
+    volumes:
+      - /run/podman/podman.sock:/var/run/docker.sock
+    depends_on:
+      - test-container-runtime
+
+  - name: test-integration
+    image: quay.io/ansible/molecule:latest
+    commands:
+      - cd ansible/tests/integration && molecule test
+    volumes:
+      - /run/podman/podman.sock:/var/run/docker.sock
+    depends_on:
+      - test-forgejo
+      - test-woodpecker
+      - test-caddy

@@ -1,0 +1,95 @@
+---
+# -- Apt packages --
+dev_tools_apt_packages:
+  - git
+  - unzip
+  - fd-find
+  - ripgrep
+  - jq
+  - iotop
+  - lldb
+  - gdb
+  - bubblewrap
+  - cage
+  - jsonnet
+  - asciinema
+  - android-tools-adb
+  - android-tools-fastboot
+  - waypipe
+  - neovim
+  - fzf
+  - zoxide
+  - direnv
+  - tmux
+  - python3-pip
+  - python3-venv
+  - nodejs
+  - npm
+  - golang
+  - rustc
+  - cargo
+  - clang
+  - clang-tools
+  - cmake
+  - make
+  - pkg-config
+  - libssl-dev
+  - python3-full
+
+# -- pip packages (installed globally with --break-system-packages) --
+dev_tools_pip_packages:
+  - python-lsp-server
+  - ruff
+  - pre-commit
+  - podman-compose
+  - tldr
+  - poetry
+  - maturin
+
+# -- npm packages --
+dev_tools_npm_packages:
+  - yaml-language-server
+  - tailwindcss-language-server
+  - vscode-langservers-extracted
+  - dockerfile-language-server-nodejs
+
+# -- cargo packages --
+dev_tools_cargo_packages:
+  - trashy
+  - wormhole-rs
+
+# -- Binary releases (architecture-aware) --
+# These are installed to /usr/local/bin
+dev_tools_nushell_version: "0.101.0"
+dev_tools_helix_version: "25.01.1"
+dev_tools_yazi_version: "25.1.3"
+dev_tools_zellij_version: "0.41.2"
+dev_tools_atuin_version: "18.4.0"
+dev_tools_carapace_version: "1.1.2"
+dev_tools_gh_version: "2.65.0"
+dev_tools_glab_version: "1.52.0"
+dev_tools_yq_version: "4.45.1"
+dev_tools_scc_version: "3.4.0"
+dev_tools_just_version: "1.39.0"
+dev_tools_distrobox_version: "1.8.0"
+dev_tools_cosign_version: "2.4.2"
+dev_tools_kind_version: "0.26.0"
+dev_tools_go_task_version: "3.40.1"
+dev_tools_talosctl_version: "1.9.2"
+dev_tools_jujutsu_version: "0.25.0"
+dev_tools_melange_version: "0.18.5"
+dev_tools_dive_version: "0.12.0"
+dev_tools_act_version: "0.2.74"
+dev_tools_marksman_version: "2024-12-18"
+dev_tools_docker_ls_version: "0.5.1"
+dev_tools_gdu_version: "5.29.0"
+dev_tools_sbctl_version: "0.16"
+
+# -- Helix config --
+dev_tools_helix_theme: boo_berry
+
+# -- Users to configure dev tools for --
+dev_tools_users:
+  - antarctica
+  - abanna
+  - tulili

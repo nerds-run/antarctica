@@ -1,0 +1,38 @@
+---
+- name: Verify woodpecker role
+  hosts: all
+  become: true
+  tasks:
+    - name: Check woodpecker-server quadlet file exists
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/woodpecker-server.container
+      register: woodpecker_server_quadlet
+
+    - name: Assert woodpecker-server quadlet exists
+      ansible.builtin.assert:
+        that:
+          - woodpecker_server_quadlet.stat.exists
+        fail_msg: "Woodpecker server quadlet file does not exist"
+
+    - name: Check woodpecker-agent quadlet file exists
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/woodpecker-agent.container
+      register: woodpecker_agent_quadlet
+
+    - name: Assert woodpecker-agent quadlet exists
+      ansible.builtin.assert:
+        that:
+          - woodpecker_agent_quadlet.stat.exists
+        fail_msg: "Woodpecker agent quadlet file does not exist"
+
+    - name: Check woodpecker data directory exists
+      ansible.builtin.stat:
+        path: /data/woodpecker
+      register: woodpecker_data
+
+    - name: Assert woodpecker data directory exists
+      ansible.builtin.assert:
+        that:
+          - woodpecker_data.stat.exists
+          - woodpecker_data.stat.isdir
+        fail_msg: "/data/woodpecker does not exist"

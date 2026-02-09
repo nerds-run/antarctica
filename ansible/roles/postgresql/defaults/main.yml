@@ -1,0 +1,10 @@
+---
+postgresql_image: docker.io/library/postgres:16-bookworm
+postgresql_port: 5432
+postgresql_db: woodpecker
+postgresql_user: woodpecker
+postgresql_data_dir: /data/postgresql
+postgresql_container_name: postgresql
+
+# 1Password reference for password
+postgresql_op_password: "op://Antarctica/postgresql/password"

@@ -1,0 +1,14 @@
+---
+- name: Antarctica Forgejo deployment
+  hosts: antarctica
+  become: true
+
+  roles:
+    - role: container_runtime
+      tags: [container_runtime]
+    - role: postgresql
+      tags: [postgresql]
+    - role: forgejo
+      tags: [forgejo]
+    - role: caddy
+      tags: [caddy]

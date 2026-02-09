@@ -1,0 +1,7 @@
+---
+caddy_forgejo_domain: forgejo.dev.nerds.run
+caddy_woodpecker_domain: woodpecker.dev.nerds.run
+caddy_forgejo_http_port: 3000
+caddy_woodpecker_http_port: 3040
+caddy_data_dir: /data/caddy
+caddy_config_dir: /etc/caddy

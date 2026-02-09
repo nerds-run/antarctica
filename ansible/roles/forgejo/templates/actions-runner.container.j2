@@ -1,0 +1,28 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Gitea Actions Runner (Podman Quadlet)
+After=network-online.target forgejo.service
+Wants=network-online.target
+Requires=forgejo.service
+
+[Container]
+ContainerName={{ forgejo_actions_runner_container_name }}
+Image={{ forgejo_actions_runner_image }}
+AutoUpdate=registry
+EnvironmentFile={{ forgejo_actions_runner_config_dir }}/action-runner.env
+Environment=GITEA_INSTANCE_URL=https://{{ forgejo_domain }}
+Environment=GITEA_RUNNER_NAME={{ forgejo_actions_runner_name }}
+Environment=GITEA_RUNNER_CAPACITY={{ forgejo_actions_runner_capacity }}
+Environment=GITEA_RUNNER_JOB_TIMEOUT={{ forgejo_actions_runner_timeout }}
+Volume=/run/podman/podman.sock:/var/run/docker.sock:Z
+Volume={{ forgejo_data_dir }}/actions-runner:/data:Z
+SecurityLabelDisable=true
+Network={{ container_runtime_network_name | default('antarctica') }}
+
+[Service]
+Restart=always
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target default.target

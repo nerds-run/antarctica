@@ -1,0 +1,134 @@
+---
+# -- Hostname & locale --
+base_server_hostname: antarctica
+base_timezone: America/Chicago
+base_locale: en_US.UTF-8
+
+# -- Domains --
+caddy_forgejo_domain: forgejo.dev.nerds.run
+caddy_woodpecker_domain: woodpecker.dev.nerds.run
+forgejo_domain: forgejo.dev.nerds.run
+woodpecker_domain: woodpecker.dev.nerds.run
+woodpecker_forgejo_domain: forgejo.dev.nerds.run
+
+# -- Service ports --
+forgejo_http_port: 3000
+forgejo_ssh_port: 2222
+caddy_forgejo_http_port: 3000
+caddy_woodpecker_http_port: 3040
+woodpecker_http_port: 3040
+woodpecker_grpc_port: 3041
+postgresql_port: 5432
+docker_registry_port: 5000
+sshx_http_port: 8051
+sshx_redis_port: 5090
+openvscode_port: 3100
+
+# -- Firewall (public-facing ports via nftables) --
+base_firewall_allowed_tcp_ports:
+  - 22    # SSH
+  - 80    # HTTP (Caddy)
+  - 443   # HTTPS (Caddy)
+  - 2222  # Forgejo git SSH
+  - 5000  # Docker Registry
+  - 8051  # SSHX
+  - 9090  # Cockpit
+
+# -- Users --
+base_users:
+  - name: antarctica
+    groups: "sudo,libvirt,kvm"
+    shell: /usr/bin/nu
+    ssh_keys:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQB1RVrTnUl5JDIs19lzIJVGi60yuXB7zYCcwN/XxZ tulili@studio"
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0Xc+SiOJZ9r3WR+UqeZgOaRYl3ZOTCpcbVfvIHJu3t abanna@pop-os"
+  - name: abanna
+    groups: "sudo,libvirt,kvm"
+    shell: /usr/bin/nu
+    ssh_keys:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0Xc+SiOJZ9r3WR+UqeZgOaRYl3ZOTCpcbVfvIHJu3t abanna@pop-os"
+  - name: tulili
+    groups: "sudo,libvirt,kvm"
+    shell: /usr/bin/nu
+    ssh_keys:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQB1RVrTnUl5JDIs19lzIJVGi60yuXB7zYCcwN/XxZ tulili@studio"
+
+base_root_ssh_keys:
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQB1RVrTnUl5JDIs19lzIJVGi60yuXB7zYCcwN/XxZ tulili@studio"
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0Xc+SiOJZ9r3WR+UqeZgOaRYl3ZOTCpcbVfvIHJu3t abanna@pop-os"
+
+base_deploy_user: deploy
+
+# -- Data directories --
+base_data_root: /data
+base_data_dirs:
+  - /data/forgejo
+  - /data/woodpecker
+  - /data/postgresql
+  - /data/caddy
+  - /data/registry
+  - /data/sshx
+  - /data/openvscode
+
+# -- Container --
+container_runtime_network_name: antarctica
+container_runtime_storage_driver: overlay
+container_runtime_unqualified_registries:
+  - docker.io
+  - quay.io
+  - ghcr.io
+
+# -- PostgreSQL --
+postgresql_image: docker.io/library/postgres:16-bookworm
+postgresql_db: woodpecker
+postgresql_user: woodpecker
+
+# -- Forgejo --
+forgejo_image: codeberg.org/forgejo/forgejo:latest
+forgejo_lfs_enabled: true
+forgejo_default_actions_url: "https://github.com"
+forgejo_webhook_allowed_hosts: "external,loopback,woodpecker.dev.nerds.run"
+
+# -- Woodpecker --
+woodpecker_server_image: docker.io/woodpeckerci/woodpecker-server:latest
+woodpecker_agent_image: docker.io/woodpeckerci/woodpecker-agent:latest
+woodpecker_open: true
+woodpecker_admins: "abanna,tulilirockz"
+woodpecker_db_driver: postgres
+woodpecker_max_workflows: 10
+woodpecker_log_level: debug
+
+# -- Docker Registry --
+docker_registry_image: docker.io/library/registry:2
+docker_registry_delete_enabled: true
+
+# -- SSHX --
+sshx_image: ghcr.io/ekzhang/sshx:latest
+sshx_redis_image: docker.io/library/redis:7-alpine
+
+# -- OpenVSCode Server --
+openvscode_image: gitpod/openvscode-server:latest
+
+# -- Gitea Actions Runner --
+forgejo_actions_runner_image: gitea/act_runner:latest
+forgejo_actions_runner_name: antarctica
+forgejo_actions_runner_capacity: 5
+
+# -- 1Password secret references --
+postgresql_op_password: "op://Infrastructure/antiarctica_postgresql/password"
+woodpecker_op_agent_secret: "op://Infrastructure/antiarctica_woodpecker/agent-secret"
+woodpecker_op_gitea_client: "op://Infrastructure/antiarctica_woodpecker/gitea-client"
+woodpecker_op_gitea_secret: "op://Infrastructure/antiarctica_woodpecker/gitea-secret"
+forgejo_op_secret_key: "op://Infrastructure/antiarctica_forgejo/secret-key"
+forgejo_op_internal_token: "op://Infrastructure/antiarctica_forgejo/internal-token"
+forgejo_op_oauth2_jwt_secret: "op://Infrastructure/antiarctica_forgejo/oauth2-jwt-secret"
+forgejo_op_lfs_jwt_secret: "op://Infrastructure/antiarctica_forgejo/lfs-jwt-secret"
+forgejo_op_action_runner_token: "op://Infrastructure/antiarctica_forgejo/action-runner-token"
+woodpecker_op_postgresql_password: "op://Infrastructure/antiarctica_postgresql/password"
+
+# -- zram --
+base_zram_percent: 75
+
+# -- sysctl --
+base_sysctl_settings:
+  kernel.sysrq: 1

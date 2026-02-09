@@ -1,0 +1,3 @@
+name: antarctica
+runtime: go
+description: Proxmox VM infrastructure for the Antarctica server (Debian + Podman services)

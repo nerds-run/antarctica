@@ -1,0 +1,14 @@
+---
+- name: Antarctica Woodpecker CI deployment
+  hosts: antarctica
+  become: true
+
+  roles:
+    - role: container_runtime
+      tags: [container_runtime]
+    - role: postgresql
+      tags: [postgresql]
+    - role: woodpecker
+      tags: [woodpecker]
+    - role: caddy
+      tags: [caddy]
