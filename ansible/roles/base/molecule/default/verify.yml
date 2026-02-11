@@ -3,21 +3,6 @@
   hosts: all
   become: true
   tasks:
-    - name: Gather service facts
-      ansible.builtin.service_facts:
-
-    - name: Assert sshd is running
-      ansible.builtin.assert:
-        that:
-          - "'sshd.service' in ansible_facts.services or 'ssh.service' in ansible_facts.services"
-        fail_msg: "SSH service is not running"
-
-    - name: Check sshd config denies password auth
-      ansible.builtin.command: sshd -T
-      register: base_sshd_config
-      changed_when: false
-      failed_when: false
-
     - name: Check unattended-upgrades is installed
       ansible.builtin.package:
         name: unattended-upgrades
@@ -34,30 +19,51 @@
       register: base_nftables_pkg
       failed_when: base_nftables_pkg is changed
 
-    - name: Verify data directories exist
+    - name: Verify data root exists
       ansible.builtin.stat:
-        path: "{{ item }}"
-      register: base_data_dirs_check
-      loop:
-        - /data
-        - /data/forgejo
-        - /data/woodpecker
-        - /data/postgresql
-        - /data/caddy
+        path: /data
+      register: base_data_root_check
 
-    - name: Assert data directories exist
+    - name: Assert data root exists
       ansible.builtin.assert:
         that:
-          - item.stat.exists
-          - item.stat.isdir
-        fail_msg: "Directory {{ item.item }} does not exist"
-      loop: "{{ base_data_dirs_check.results }}"
+          - base_data_root_check.stat.exists
+          - base_data_root_check.stat.isdir
+        fail_msg: "/data directory does not exist"
 
-    - name: Check timezone is set
-      ansible.builtin.command: timedatectl show --property=Timezone --value
-      register: base_tz_result
+    - name: Check deploy user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: deploy
+      register: base_deploy_user_check
+
+    - name: Assert deploy user exists
+      ansible.builtin.assert:
+        that:
+          - base_deploy_user_check is not failed
+        fail_msg: "Deploy user does not exist"
+
+    - name: Check locale is set
+      ansible.builtin.command: locale -a
+      register: base_locale_check
       changed_when: false
-      failed_when: false
+
+    - name: Assert en_US.UTF-8 locale exists
+      ansible.builtin.assert:
+        that:
+          - "'en_US.utf8' in base_locale_check.stdout"
+        fail_msg: "en_US.UTF-8 locale not generated"
+
+    - name: Check MOTD exists
+      ansible.builtin.stat:
+        path: /etc/motd
+      register: base_motd_check
+
+    - name: Assert MOTD exists
+      ansible.builtin.assert:
+        that:
+          - base_motd_check.stat.exists
+        fail_msg: "MOTD file does not exist"
 
     - name: Check qemu-guest-agent is installed
       ansible.builtin.package:

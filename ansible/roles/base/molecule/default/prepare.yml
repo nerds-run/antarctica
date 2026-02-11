@@ -15,6 +15,7 @@
           - sudo
           - systemd
           - gpg
+          - locales
         state: present
 
     - name: Create mock op CLI for testing

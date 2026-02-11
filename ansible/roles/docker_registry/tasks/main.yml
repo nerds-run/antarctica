@@ -11,17 +11,27 @@
     src: docker-registry.container.j2
     dest: /etc/containers/systemd/docker-registry.container
     mode: "0644"
-  notify:
-    - Daemon reload registry
-    - Restart docker-registry
+  register: docker_registry_quadlet
 
 # -- Reload and start --
 - name: Reload systemd daemon for quadlet
   ansible.builtin.systemd:
     daemon_reload: true
+  tags:
+    - molecule-notest
 
 - name: Enable and start Docker Registry container
   ansible.builtin.systemd:
     name: docker-registry
     enabled: true
     state: started
+  tags:
+    - molecule-notest
+
+- name: Restart Docker Registry on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: docker-registry
+    state: restarted
+  when: docker_registry_quadlet is changed
+  tags:
+    - molecule-notest

@@ -16,7 +16,7 @@
 
     - name: Check forgejo env file exists
       ansible.builtin.stat:
-        path: /etc/forgejo/env
+        path: /etc/forgejo/forgejo.env
       register: forgejo_verify_env
 
     - name: Assert forgejo env file exists

@@ -29,19 +29,6 @@
   loop: "{{ dev_tools_npm_packages }}"
 
 # ============================================================
-# cargo packages
-# ============================================================
-- name: Install cargo packages
-  ansible.builtin.command:
-    cmd: "cargo install {{ item }}"
-  environment:
-    CARGO_HOME: /usr/local/cargo
-    PATH: "/usr/local/cargo/bin:/usr/bin:/bin"
-  args:
-    creates: "/usr/local/cargo/bin/{{ item | regex_replace('-', '_') | regex_replace('wormhole_rs', 'wormhole-rs') }}"
-  loop: "{{ dev_tools_cargo_packages }}"
-
-# ============================================================
 # Nushell (GitHub release)
 # ============================================================
 - name: Check if nushell is installed at target version
@@ -52,7 +39,7 @@
   failed_when: false
 
 - name: Download and install nushell
-  when: dev_tools_dev_tools_nu_version_check.rc != 0 or dev_tools_nushell_version not in (dev_tools_nu_version_check.stdout | default(''))
+  when: dev_tools_nu_version_check.rc != 0 or dev_tools_nushell_version not in (dev_tools_nu_version_check.stdout | default(''))
   block:
     - name: Download nushell tarball
       ansible.builtin.get_url:
@@ -106,7 +93,7 @@
   failed_when: false
 
 - name: Download and install helix
-  when: dev_tools_dev_tools_hx_version_check.rc != 0 or dev_tools_helix_version not in (dev_tools_hx_version_check.stdout | default(''))
+  when: dev_tools_hx_version_check.rc != 0 or dev_tools_helix_version not in (dev_tools_hx_version_check.stdout | default(''))
   block:
     - name: Download helix tarball
       ansible.builtin.get_url:
@@ -164,6 +151,8 @@
     group: "{{ item }}"
     mode: "0755"
   loop: "{{ dev_tools_users }}"
+  tags:
+    - molecule-notest
 
 - name: Deploy helix config per user
   ansible.builtin.template:
@@ -173,6 +162,8 @@
     group: "{{ item }}"
     mode: "0644"
   loop: "{{ dev_tools_users }}"
+  tags:
+    - molecule-notest
 
 # ============================================================
 # GitHub CLI
@@ -185,7 +176,7 @@
   failed_when: false
 
 - name: Download and install gh CLI
-  when: dev_tools_dev_tools_gh_version_check.rc != 0 or dev_tools_gh_version not in (dev_tools_gh_version_check.stdout | default(''))
+  when: dev_tools_gh_version_check.rc != 0 or dev_tools_gh_version not in (dev_tools_gh_version_check.stdout | default(''))
   block:
     - name: Download gh CLI tarball
       ansible.builtin.get_url:
@@ -217,17 +208,22 @@
 # ============================================================
 # glab (GitLab CLI)
 # ============================================================
-- name: Download and install glab
-  ansible.builtin.get_url:
-    url: "https://gitlab.com/gitlab-org/cli/-/releases/v{{ dev_tools_glab_version }}/downloads/glab_{{ dev_tools_glab_version }}_Linux_x86_64.tar.gz"
-    dest: /tmp/glab.tar.gz
-    mode: "0644"
-  register: dev_tools_glab_download
+- name: Check if glab is installed at target version
+  ansible.builtin.command:
+    cmd: /usr/local/bin/glab --version
+  register: dev_tools_glab_version_check
   changed_when: false
+  failed_when: false
 
-- name: Extract and install glab
-  when: dev_tools_glab_download is succeeded
+- name: Download and install glab
+  when: dev_tools_glab_version_check.rc != 0 or dev_tools_glab_version not in (dev_tools_glab_version_check.stdout | default(''))
   block:
+    - name: Download glab tarball
+      ansible.builtin.get_url:
+        url: "https://gitlab.com/gitlab-org/cli/-/releases/v{{ dev_tools_glab_version }}/downloads/glab_{{ dev_tools_glab_version }}_linux_amd64.tar.gz"
+        dest: /tmp/glab.tar.gz
+        mode: "0644"
+
     - name: Extract glab
       ansible.builtin.unarchive:
         src: /tmp/glab.tar.gz
@@ -414,71 +410,29 @@
 # ============================================================
 # distrobox
 # ============================================================
+- name: Check if distrobox is installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/distrobox
+  register: dev_tools_distrobox_check
+
 - name: Download and install distrobox
-  ansible.builtin.get_url:
-    url: "https://github.com/89luca89/distrobox/releases/download/{{ dev_tools_distrobox_version }}/distrobox"
-    dest: /usr/local/bin/distrobox
-    mode: "0755"
+  when: not dev_tools_distrobox_check.stat.exists
+  block:
+    - name: Download distrobox install script
+      ansible.builtin.get_url:
+        url: "https://raw.githubusercontent.com/89luca89/distrobox/{{ dev_tools_distrobox_version }}/install"
+        dest: /tmp/distrobox-install.sh
+        mode: "0755"
 
-# ============================================================
-# jujutsu
-# ============================================================
-- name: Download jujutsu
-  ansible.builtin.get_url:
-    url: "https://github.com/jj-vcs/jj/releases/download/v{{ dev_tools_jujutsu_version }}/jj-v{{ dev_tools_jujutsu_version }}-x86_64-unknown-linux-musl.tar.gz"
-    dest: /tmp/jujutsu.tar.gz
-    mode: "0644"
-  changed_when: false
+    - name: Install distrobox
+      ansible.builtin.command:
+        cmd: /tmp/distrobox-install.sh --prefix /usr/local
+        creates: /usr/local/bin/distrobox
 
-- name: Extract and install jujutsu
-  ansible.builtin.unarchive:
-    src: /tmp/jujutsu.tar.gz
-    dest: /usr/local/bin/
-    remote_src: true
-    include:
-      - jj
-    mode: "0755"
-
-# ============================================================
-# sbctl
-# ============================================================
-- name: Download sbctl
-  ansible.builtin.get_url:
-    url: "https://github.com/Foxboron/sbctl/releases/download/{{ dev_tools_sbctl_version }}/sbctl-{{ dev_tools_sbctl_version }}-linux-amd64.tar.gz"
-    dest: /tmp/sbctl.tar.gz
-    mode: "0644"
-  changed_when: false
-
-- name: Create sbctl extract dir
-  ansible.builtin.file:
-    path: /tmp/sbctl-extract
-    state: directory
-    mode: "0755"
-
-- name: Extract sbctl
-  ansible.builtin.unarchive:
-    src: /tmp/sbctl.tar.gz
-    dest: /tmp/sbctl-extract
-    remote_src: true
-
-- name: Install sbctl binary
-  ansible.builtin.command:
-    cmd: find /tmp/sbctl-extract -name sbctl -type f -exec cp {} /usr/local/bin/sbctl \;
-  args:
-    creates: /usr/local/bin/sbctl
-
-- name: Set sbctl permissions
-  ansible.builtin.file:
-    path: /usr/local/bin/sbctl
-    mode: "0755"
-
-- name: Clean up sbctl download
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  loop:
-    - /tmp/sbctl.tar.gz
-    - /tmp/sbctl-extract
+    - name: Clean up distrobox install script
+      ansible.builtin.file:
+        path: /tmp/distrobox-install.sh
+        state: absent
 
 # ============================================================
 # atuin (shell history)
@@ -491,7 +445,7 @@
   failed_when: false
 
 - name: Download and install atuin
-  when: dev_tools_dev_tools_atuin_version_check.rc != 0 or dev_tools_atuin_version not in (dev_tools_atuin_version_check.stdout | default(''))
+  when: dev_tools_atuin_version_check.rc != 0 or dev_tools_atuin_version not in (dev_tools_atuin_version_check.stdout | default(''))
   block:
     - name: Download atuin tarball
       ansible.builtin.get_url:
@@ -521,65 +475,6 @@
         state: absent
 
 # ============================================================
-# carapace (shell completion)
-# ============================================================
-- name: Install carapace
-  ansible.builtin.get_url:
-    url: "https://github.com/carapace-sh/carapace-bin/releases/download/v{{ dev_tools_carapace_version }}/carapace-bin_linux_amd64.tar.gz"
-    dest: /tmp/carapace.tar.gz
-    mode: "0644"
-  changed_when: false
-
-- name: Extract and install carapace
-  ansible.builtin.unarchive:
-    src: /tmp/carapace.tar.gz
-    dest: /usr/local/bin/
-    remote_src: true
-    include:
-      - carapace
-    mode: "0755"
-
-# ============================================================
-# yazi (file manager)
-# ============================================================
-- name: Check if yazi is installed at target version
-  ansible.builtin.command:
-    cmd: /usr/local/bin/yazi --version
-  register: dev_tools_yazi_version_check
-  changed_when: false
-  failed_when: false
-
-- name: Download and install yazi
-  when: dev_tools_dev_tools_yazi_version_check.rc != 0 or dev_tools_yazi_version not in (dev_tools_yazi_version_check.stdout | default(''))
-  block:
-    - name: Download yazi tarball
-      ansible.builtin.get_url:
-        url: "https://github.com/sxyazi/yazi/releases/download/v{{ dev_tools_yazi_version }}/yazi-x86_64-unknown-linux-gnu.zip"
-        dest: /tmp/yazi.zip
-        mode: "0644"
-
-    - name: Extract yazi
-      ansible.builtin.unarchive:
-        src: /tmp/yazi.zip
-        dest: /tmp/
-        remote_src: true
-
-    - name: Install yazi binary
-      ansible.builtin.command:
-        cmd: find /tmp -name yazi -type f -executable -exec cp {} /usr/local/bin/yazi \;
-      changed_when: true
-
-    - name: Set yazi permissions
-      ansible.builtin.file:
-        path: /usr/local/bin/yazi
-        mode: "0755"
-
-    - name: Clean up yazi download
-      ansible.builtin.file:
-        path: /tmp/yazi.zip
-        state: absent
-
-# ============================================================
 # zellij (terminal multiplexer)
 # ============================================================
 - name: Check if zellij is installed at target version
@@ -590,7 +485,7 @@
   failed_when: false
 
 - name: Download and install zellij
-  when: dev_tools_dev_tools_zellij_version_check.rc != 0 or dev_tools_zellij_version not in (dev_tools_zellij_version_check.stdout | default(''))
+  when: dev_tools_zellij_version_check.rc != 0 or dev_tools_zellij_version not in (dev_tools_zellij_version_check.stdout | default(''))
   block:
     - name: Download zellij tarball
       ansible.builtin.get_url:
@@ -609,39 +504,6 @@
       ansible.builtin.file:
         path: /tmp/zellij.tar.gz
         state: absent
-
-# ============================================================
-# melange
-# ============================================================
-- name: Install melange
-  ansible.builtin.get_url:
-    # yamllint disable-line rule:line-length
-    url: "https://github.com/chainguard-dev/melange/releases/download/v{{ dev_tools_melange_version }}/melange_{{ dev_tools_melange_version }}_linux_amd64.tar.gz"
-    dest: /tmp/melange.tar.gz
-    mode: "0644"
-  changed_when: false
-
-- name: Extract and install melange
-  ansible.builtin.unarchive:
-    src: /tmp/melange.tar.gz
-    dest: /usr/local/bin/
-    remote_src: true
-    include:
-      - melange
-    mode: "0755"
-
-# ============================================================
-# Go language servers (gopls)
-# ============================================================
-- name: Install gopls
-  ansible.builtin.command:
-    cmd: go install golang.org/x/tools/gopls@latest
-  environment:
-    GOPATH: /usr/local/go
-    GOBIN: /usr/local/bin
-    PATH: "/usr/local/go/bin:/usr/local/bin:/usr/bin:/bin"
-  args:
-    creates: /usr/local/bin/gopls
 
 # ============================================================
 # rust-analyzer
@@ -690,6 +552,8 @@
     group: "{{ item }}"
     mode: "0755"
   loop: "{{ dev_tools_users }}"
+  tags:
+    - molecule-notest
 
 - name: Clone TPM for each user
   ansible.builtin.git:
@@ -700,6 +564,8 @@
   become: true
   become_user: "{{ item }}"
   loop: "{{ dev_tools_users }}"
+  tags:
+    - molecule-notest
 
 # ============================================================
 # Environment variables via /etc/profile.d/
@@ -718,12 +584,5 @@
     name: "{{ item }}"
     shell: /usr/local/bin/nu
   loop: "{{ dev_tools_users }}"
-
-# ============================================================
-# Add /usr/local/cargo/bin to PATH
-# ============================================================
-- name: Ensure cargo bin is in system PATH
-  ansible.builtin.copy:
-    content: 'export PATH="/usr/local/cargo/bin:$PATH"'
-    dest: /etc/profile.d/cargo.sh
-    mode: "0644"
+  tags:
+    - molecule-notest

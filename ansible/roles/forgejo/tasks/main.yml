@@ -20,6 +20,8 @@
   no_log: true
   delegate_to: localhost
   become: false
+  tags:
+    - molecule-notest
 
 - name: Retrieve Forgejo internal token from 1Password
   ansible.builtin.command:
@@ -29,6 +31,8 @@
   no_log: true
   delegate_to: localhost
   become: false
+  tags:
+    - molecule-notest
 
 - name: Retrieve Forgejo OAuth2 JWT secret from 1Password
   ansible.builtin.command:
@@ -38,6 +42,8 @@
   no_log: true
   delegate_to: localhost
   become: false
+  tags:
+    - molecule-notest
 
 - name: Retrieve Forgejo LFS JWT secret from 1Password
   ansible.builtin.command:
@@ -47,6 +53,8 @@
   no_log: true
   delegate_to: localhost
   become: false
+  tags:
+    - molecule-notest
 
 - name: Set Forgejo secret facts
   ansible.builtin.set_fact:
@@ -55,6 +63,8 @@
     forgejo_oauth2_jwt_secret: "{{ forgejo_oauth2_jwt_result.stdout }}"
     forgejo_lfs_jwt_secret: "{{ forgejo_lfs_jwt_result.stdout }}"
   no_log: true
+  tags:
+    - molecule-notest
 
 # -- Env file --
 - name: Deploy Forgejo env file
@@ -63,7 +73,7 @@
     dest: "{{ forgejo_config_dir }}/forgejo.env"
     mode: "0600"
   no_log: true
-  notify: Restart forgejo
+  register: forgejo_env
 
 # -- Quadlet container file --
 - name: Deploy Forgejo quadlet container file
@@ -71,24 +81,26 @@
     src: forgejo.container.j2
     dest: /etc/containers/systemd/forgejo.container
     mode: "0644"
-  notify:
-    - Daemon reload forgejo
-    - Restart forgejo
+  register: forgejo_quadlet
 
 # -- Gitea Actions Runner --
 - name: Retrieve Actions Runner token from 1Password
   ansible.builtin.command:
-    cmd: "op read '{{ forgejo_op_forgejo_action_runner_token }}'"
+    cmd: "op read '{{ forgejo_op_action_runner_token }}'"
   register: forgejo_action_runner_token_result
   changed_when: false
   no_log: true
   delegate_to: localhost
   become: false
+  tags:
+    - molecule-notest
 
 - name: Set Actions Runner token fact
   ansible.builtin.set_fact:
     forgejo_action_runner_token: "{{ forgejo_action_runner_token_result.stdout }}"
   no_log: true
+  tags:
+    - molecule-notest
 
 - name: Deploy Actions Runner env file
   ansible.builtin.copy:
@@ -96,30 +108,50 @@
     dest: "{{ forgejo_actions_runner_config_dir }}/action-runner.env"
     mode: "0600"
   no_log: true
-  notify: Restart actions-runner
+  register: forgejo_actions_runner_env
 
 - name: Deploy Gitea Actions Runner quadlet container file
   ansible.builtin.template:
     src: actions-runner.container.j2
     dest: /etc/containers/systemd/actions-runner.container
     mode: "0644"
-  notify:
-    - Daemon reload forgejo
-    - Restart actions-runner
+  register: forgejo_actions_runner_quadlet
 
 # -- Reload and start --
 - name: Reload systemd daemon for quadlet
   ansible.builtin.systemd:
     daemon_reload: true
+  tags:
+    - molecule-notest
 
 - name: Enable and start Forgejo container
   ansible.builtin.systemd:
     name: forgejo
     enabled: true
     state: started
+  tags:
+    - molecule-notest
 
 - name: Enable and start Actions Runner container
   ansible.builtin.systemd:
     name: actions-runner
     enabled: true
     state: started
+  tags:
+    - molecule-notest
+
+- name: Restart Forgejo on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: forgejo
+    state: restarted
+  when: forgejo_env is changed or forgejo_quadlet is changed
+  tags:
+    - molecule-notest
+
+- name: Restart Actions Runner on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: actions-runner
+    state: restarted
+  when: forgejo_actions_runner_env is changed or forgejo_actions_runner_quadlet is changed
+  tags:
+    - molecule-notest

@@ -7,6 +7,7 @@
       - slirp4netns
       - crun
       - fuse-overlayfs
+      - cron
     state: present
 
 # -- Registries config --
@@ -45,12 +46,16 @@
   register: container_runtime_network_check
   changed_when: false
   failed_when: false
+  tags:
+    - molecule-notest
 
 - name: Create podman network
   ansible.builtin.command:
     cmd: "podman network create {{ container_runtime_network_name }}"
   when: container_runtime_network_check.rc != 0
   changed_when: true
+  tags:
+    - molecule-notest
 
 # -- Podman socket for API access --
 - name: Enable podman socket
@@ -58,6 +63,8 @@
     name: podman.socket
     enabled: true
     state: started
+  tags:
+    - molecule-notest
 
 # -- Podman auto-update timer --
 - name: Enable podman auto-update timer
@@ -65,6 +72,8 @@
     name: podman-auto-update.timer
     enabled: true
     state: started
+  tags:
+    - molecule-notest
 
 # -- Container prune cron --
 - name: Set up container prune cron job

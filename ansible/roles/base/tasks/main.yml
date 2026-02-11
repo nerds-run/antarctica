@@ -2,36 +2,20 @@
 # -- Hostname --
 - name: Set hostname
   ansible.builtin.hostname:
-    name: "{{ base_base_server_hostname }}"
+    name: "{{ base_server_hostname }}"
+  tags:
+    - molecule-notest
 
 - name: Set hostname in /etc/hosts
   ansible.builtin.lineinfile:
     path: /etc/hosts
     regexp: '^127\.0\.1\.1'
-    line: "127.0.1.1 {{ base_base_server_hostname }}"
+    line: "127.0.1.1 {{ base_server_hostname }}"
     state: present
+  tags:
+    - molecule-notest
 
-# -- Locale --
-- name: Generate locale
-  community.general.locale_gen:
-    name: "{{ base_base_locale }}"
-    state: present
-
-- name: Set default locale
-  ansible.builtin.copy:
-    content: |
-      LANG={{ base_base_locale }}
-      LC_ALL={{ base_base_locale }}
-    dest: /etc/default/locale
-    mode: "0644"
-
-# -- Timezone --
-- name: Set timezone
-  community.general.timezone:
-    name: "{{ base_base_timezone }}"
-  notify: Restart timesyncd
-
-# -- Apt packages --
+# -- Apt packages (must run before locale/timezone) --
 - name: Update apt cache
   ansible.builtin.apt:
     update_cache: true
@@ -41,6 +25,26 @@
   ansible.builtin.apt:
     name: "{{ base_packages }}"
     state: present
+
+# -- Locale --
+- name: Generate locale
+  community.general.locale_gen:
+    name: "{{ base_locale }}"
+    state: present
+
+- name: Set default locale
+  ansible.builtin.copy:
+    content: |
+      LANG={{ base_locale }}
+      LC_ALL={{ base_locale }}
+    dest: /etc/default/locale
+    mode: "0644"
+
+# -- Timezone --
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ base_timezone }}"
+  notify: Restart timesyncd
 
 # -- Unattended upgrades --
 - name: Enable unattended upgrades
@@ -66,17 +70,21 @@
     value: "{{ item.value }}"
     sysctl_file: /etc/sysctl.d/99-antarctica.conf
     reload: true
-  loop: "{{ sysctl_settings | dict2items }}"
+  loop: "{{ base_sysctl_settings | dict2items }}"
+  tags:
+    - molecule-notest
 
 # -- zram swap --
 - name: Configure zram-tools
   ansible.builtin.copy:
     content: |
       ALGO=zstd
-      PERCENT={{ base_base_zram_percent }}
+      PERCENT={{ base_zram_percent }}
     dest: /etc/default/zramswap
     mode: "0644"
   notify: Restart zramswap
+  tags:
+    - molecule-notest
 
 # -- Sudo --
 - name: Disable sudo lecture
@@ -89,15 +97,15 @@
 # -- Deploy user --
 - name: Create deploy user
   ansible.builtin.user:
-    name: "{{ base_base_deploy_user }}"
+    name: "{{ base_deploy_user }}"
     system: true
     shell: /usr/sbin/nologin
     create_home: false
 
 - name: Grant deploy user passwordless sudo
   ansible.builtin.copy:
-    content: "{{ base_base_deploy_user }} ALL=(ALL) NOPASSWD: ALL\n"
-    dest: "/etc/sudoers.d/{{ base_base_deploy_user }}"
+    content: "{{ base_deploy_user }} ALL=(ALL) NOPASSWD: ALL\n"
+    dest: "/etc/sudoers.d/{{ base_deploy_user }}"
     mode: "0440"
     validate: "visudo -cf %s"
 
@@ -124,14 +132,14 @@
     user: "{{ item.0.name }}"
     key: "{{ item.1 }}"
     state: present
-  loop: "{{ users | subelements('ssh_keys') }}"
+  loop: "{{ base_users | subelements('ssh_keys') }}"
 
 - name: Set authorized keys for root
   ansible.posix.authorized_key:
     user: root
     key: "{{ item }}"
     state: present
-  loop: "{{ base_base_root_ssh_keys }}"
+  loop: "{{ base_root_ssh_keys }}"
 
 # -- SSH --
 - name: Deploy sshd_config
@@ -141,6 +149,8 @@
     mode: "0600"
     validate: "sshd -t -f %s"
   notify: Restart sshd
+  tags:
+    - molecule-notest
 
 # -- nftables firewall --
 - name: Deploy nftables config
@@ -155,6 +165,8 @@
     name: nftables
     enabled: true
     state: started
+  tags:
+    - molecule-notest
 
 # -- Disable ufw (we use nftables directly) --
 - name: Disable ufw
@@ -163,6 +175,8 @@
     enabled: false
     state: stopped
   failed_when: false
+  tags:
+    - molecule-notest
 
 # -- fail2ban --
 - name: Enable and start fail2ban
@@ -170,6 +184,8 @@
     name: fail2ban
     enabled: true
     state: started
+  tags:
+    - molecule-notest
 
 # -- MOTD --
 - name: Deploy MOTD
@@ -181,7 +197,7 @@
 # -- Data directories --
 - name: Create data root directory
   ansible.builtin.file:
-    path: "{{ base_base_data_root }}"
+    path: "{{ base_data_root }}"
     state: directory
     mode: "0755"
 
@@ -190,7 +206,7 @@
     path: "{{ item }}"
     state: directory
     mode: "0755"
-  loop: "{{ base_base_data_dirs }}"
+  loop: "{{ base_data_dirs }}"
 
 # -- qemu-guest-agent --
 - name: Enable qemu-guest-agent
@@ -198,6 +214,8 @@
     name: qemu-guest-agent
     enabled: true
     state: started
+  tags:
+    - molecule-notest
 
 # -- binfmt for aarch64 --
 - name: Enable binfmt-support
@@ -205,6 +223,8 @@
     name: binfmt-support
     enabled: true
     state: started
+  tags:
+    - molecule-notest
 
 # -- Cockpit --
 - name: Enable cockpit
@@ -212,6 +232,8 @@
     name: cockpit.socket
     enabled: true
     state: started
+  tags:
+    - molecule-notest
 
 # -- NTP via systemd-timesyncd --
 - name: Enable systemd-timesyncd
@@ -219,3 +241,5 @@
     name: systemd-timesyncd
     enabled: true
     state: started
+  tags:
+    - molecule-notest

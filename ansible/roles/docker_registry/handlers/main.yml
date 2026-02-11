@@ -1,9 +1,1 @@
 ---
-- name: Daemon reload registry
-  ansible.builtin.systemd:
-    daemon_reload: true
-
-- name: Restart docker-registry
-  ansible.builtin.systemd:
-    name: docker-registry
-    state: restarted

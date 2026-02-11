@@ -10,7 +10,6 @@ container_runtime_unqualified_registries:
 container_runtime_data_dirs:
   - /data/forgejo
   - /data/woodpecker
-  - /data/postgresql
   - /data/registry
   - /data/sshx
 

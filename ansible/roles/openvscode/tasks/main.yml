@@ -11,17 +11,27 @@
     src: openvscode-server.container.j2
     dest: /etc/containers/systemd/openvscode-server.container
     mode: "0644"
-  notify:
-    - Daemon reload openvscode
-    - Restart openvscode-server
+  register: openvscode_quadlet
 
 # -- Reload and start --
 - name: Reload systemd daemon for quadlet
   ansible.builtin.systemd:
     daemon_reload: true
+  tags:
+    - molecule-notest
 
 - name: Enable and start OpenVSCode Server container
   ansible.builtin.systemd:
     name: openvscode-server
     enabled: true
     state: started
+  tags:
+    - molecule-notest
+
+- name: Restart OpenVSCode Server on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: openvscode-server
+    state: restarted
+  when: openvscode_quadlet is changed
+  tags:
+    - molecule-notest

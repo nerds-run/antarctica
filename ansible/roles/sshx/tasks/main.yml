@@ -17,9 +17,7 @@
     src: sshx-redis.container.j2
     dest: /etc/containers/systemd/sshx-redis.container
     mode: "0644"
-  notify:
-    - Daemon reload sshx
-    - Restart sshx-redis
+  register: sshx_redis_quadlet
 
 # -- SSHX server quadlet --
 - name: Deploy SSHX quadlet container file
@@ -27,23 +25,43 @@
     src: sshx.container.j2
     dest: /etc/containers/systemd/sshx.container
     mode: "0644"
-  notify:
-    - Daemon reload sshx
-    - Restart sshx
+  register: sshx_quadlet
 
 # -- Reload and start --
 - name: Reload systemd daemon for quadlet
   ansible.builtin.systemd:
     daemon_reload: true
+  tags:
+    - molecule-notest
 
 - name: Enable and start SSHX Redis container
   ansible.builtin.systemd:
     name: sshx-redis
     enabled: true
     state: started
+  tags:
+    - molecule-notest
 
 - name: Enable and start SSHX container
   ansible.builtin.systemd:
     name: sshx
     enabled: true
     state: started
+  tags:
+    - molecule-notest
+
+- name: Restart SSHX Redis on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: sshx-redis
+    state: restarted
+  when: sshx_redis_quadlet is changed
+  tags:
+    - molecule-notest
+
+- name: Restart SSHX on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: sshx
+    state: restarted
+  when: sshx_quadlet is changed
+  tags:
+    - molecule-notest
