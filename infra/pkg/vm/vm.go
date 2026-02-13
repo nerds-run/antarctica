@@ -10,10 +10,12 @@ import (
 
 // Config holds all tunables for the Proxmox VM.
 type Config struct {
-	// Proxmox target node (e.g. "pve").
+	// Proxmox target node (e.g. "m0x-01").
 	Node string
 	// Numeric VM ID on the Proxmox cluster.
 	VMID int
+	// VM ID of the cloud-init template to clone from.
+	TemplateVMID int
 	// Hostname written into cloud-init.
 	Hostname string
 	// Number of CPU cores.
@@ -66,25 +68,25 @@ func Provision(ctx *pulumi.Context, cfg Config) (*Result, error) {
 		VmId:     pulumi.Int(cfg.VMID),
 		Name:     pulumi.String(cfg.Hostname),
 
-		// Baseline: UEFI firmware + q35 machine type (modern PCIe).
+		// UEFI firmware + q35 machine type (modern PCIe).
 		Bios:    pulumi.String("ovmf"),
 		Machine: pulumi.String("q35"),
 
 		// Clone from an existing cloud-init template.
 		Clone: &proxmox.VirtualMachineCloneArgs{
 			NodeName: pulumi.String(cfg.Node),
-			VmId:     pulumi.Int(cfg.VMID),
+			VmId:     pulumi.Int(cfg.TemplateVMID),
 			Full:     pulumi.Bool(true),
 		},
 
-		// Baseline: CPU type "host" for best performance + instruction sets.
+		// CPU configuration.
 		Cpu: &proxmox.VirtualMachineCpuArgs{
 			Cores:   pulumi.Int(cfg.CPUCores),
 			Sockets: pulumi.Int(1),
 			Type:    pulumi.String("host"),
 		},
 
-		// Baseline: Dedicated memory, ballooning disabled.
+		// Dedicated memory, ballooning disabled.
 		Memory: &proxmox.VirtualMachineMemoryArgs{
 			Dedicated: pulumi.Int(cfg.MemoryMB),
 			Floating:  pulumi.Int(0),
@@ -97,11 +99,10 @@ func Provision(ctx *pulumi.Context, cfg Config) (*Result, error) {
 			Type:    pulumi.String("virtio"),
 		},
 
-		// Baseline: VirtIO SCSI controller (NOT "Single").
+		// VirtIO SCSI controller.
 		ScsiHardware: pulumi.String("virtio-scsi-pci"),
 
 		// Boot disk (root filesystem) + data disk.
-		// Baseline: raw format, write-through cache, SSD emulation + discard.
 		Disks: proxmox.VirtualMachineDiskArray{
 			// Boot disk: OS root filesystem.
 			&proxmox.VirtualMachineDiskArgs{
@@ -127,12 +128,13 @@ func Provision(ctx *pulumi.Context, cfg Config) (*Result, error) {
 
 		// EFI disk required for UEFI/OVMF firmware.
 		EfiDisk: &proxmox.VirtualMachineEfiDiskArgs{
-			DatastoreId:    pulumi.String(cfg.StoragePool),
+			DatastoreId:     pulumi.String(cfg.StoragePool),
+			FileFormat:      pulumi.String("raw"),
 			PreEnrolledKeys: pulumi.Bool(false),
-			Type:           pulumi.String("4m"),
+			Type:            pulumi.String("4m"),
 		},
 
-		// Baseline: virtio network model for best performance.
+		// Virtio network device.
 		NetworkDevices: proxmox.VirtualMachineNetworkDeviceArray{
 			&proxmox.VirtualMachineNetworkDeviceArgs{
 				Bridge: pulumi.String(cfg.NetworkBridge),
@@ -156,6 +158,13 @@ func Provision(ctx *pulumi.Context, cfg Config) (*Result, error) {
 			},
 		},
 
+		// Disable the empty CD-ROM drive inherited from the template clone.
+		// Without this, QEMU fails to start (exit code 1) due to ide3: cdrom.
+		Cdrom: &proxmox.VirtualMachineCdromArgs{
+			Enabled: pulumi.Bool(false),
+			FileId:  pulumi.String("none"),
+		},
+
 		// Boot order: disk first, then network.
 		BootOrders: pulumi.StringArray{
 			pulumi.String("scsi0"),
@@ -174,24 +183,28 @@ func Provision(ctx *pulumi.Context, cfg Config) (*Result, error) {
 		return nil, fmt.Errorf("creating proxmox VM: %w", err)
 	}
 
-	// Extract the first IPv4 address from the VM's network interfaces.
-	// The QEMU guest agent reports this once the VM boots.
-	ipAddr := vm.Ipv4Addresses.ApplyT(func(addrs [][]string) string {
-		// addrs is indexed by interface; skip loopback (usually index 0).
-		for i, iface := range addrs {
-			if i == 0 {
-				continue // skip loopback
+	// Determine the VM's IP address. When a static IP is configured, use it
+	// directly (stripped of the CIDR suffix) so we don't depend on the QEMU
+	// guest agent. For DHCP, fall back to the guest agent's report.
+	var ipAddr pulumi.StringOutput
+	if cfg.IPAddress != "" {
+		ipAddr = pulumi.String(stripCIDR(cfg.IPAddress)).ToStringOutput()
+	} else {
+		ipAddr = vm.Ipv4Addresses.ApplyT(func(addrs [][]string) string {
+			for i, iface := range addrs {
+				if i == 0 {
+					continue // skip loopback
+				}
+				if len(iface) > 0 {
+					return iface[0]
+				}
 			}
-			if len(iface) > 0 {
-				return iface[0]
+			if len(addrs) > 0 && len(addrs[0]) > 0 {
+				return addrs[0][0]
 			}
-		}
-		// Fallback: return first address of first interface.
-		if len(addrs) > 0 && len(addrs[0]) > 0 {
-			return addrs[0][0]
-		}
-		return ""
-	}).(pulumi.StringOutput)
+			return ""
+		}).(pulumi.StringOutput)
+	}
 
 	return &Result{
 		VM:        vm,
@@ -214,6 +227,17 @@ func buildIPConfig(dhcp bool, ipAddr, gateway string) *proxmox.VirtualMachineIni
 			Gateway: pulumi.String(gateway),
 		},
 	}
+}
+
+// stripCIDR removes the "/prefix" suffix from a CIDR address (e.g.
+// "172.22.202.50/24" -> "172.22.202.50").
+func stripCIDR(addr string) string {
+	for i := 0; i < len(addr); i++ {
+		if addr[i] == '/' {
+			return addr[:i]
+		}
+	}
+	return addr
 }
 
 // splitKeys splits a newline-separated list of SSH public keys into a slice,

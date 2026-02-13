@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="SSH into a running Molecule instance for debugging"
+# Usage: mise run test:login <role_name>
+set -euo pipefail
+
+ROLE="${1:?Usage: mise run test:login <role_name>}"
+cd "$MISE_PROJECT_ROOT/ansible/roles/$ROLE"
+molecule login

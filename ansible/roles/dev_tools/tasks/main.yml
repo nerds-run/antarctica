@@ -29,58 +29,12 @@
   loop: "{{ dev_tools_npm_packages }}"
 
 # ============================================================
-# Nushell (GitHub release)
+# Zsh
 # ============================================================
-- name: Check if nushell is installed at target version
-  ansible.builtin.command:
-    cmd: /usr/local/bin/nu --version
-  register: dev_tools_nu_version_check
-  changed_when: false
-  failed_when: false
-
-- name: Download and install nushell
-  when: dev_tools_nu_version_check.rc != 0 or dev_tools_nushell_version not in (dev_tools_nu_version_check.stdout | default(''))
-  block:
-    - name: Download nushell tarball
-      ansible.builtin.get_url:
-        # yamllint disable-line rule:line-length
-        url: "https://github.com/nushell/nushell/releases/download/{{ dev_tools_nushell_version }}/nu-{{ dev_tools_nushell_version }}-x86_64-unknown-linux-gnu.tar.gz"
-        dest: /tmp/nushell.tar.gz
-        mode: "0644"
-
-    - name: Extract nushell
-      ansible.builtin.unarchive:
-        src: /tmp/nushell.tar.gz
-        dest: /tmp/
-        remote_src: true
-
-    - name: Install nushell binary
-      ansible.builtin.copy:
-        src: "/tmp/nu-{{ dev_tools_nushell_version }}-x86_64-unknown-linux-gnu/nu"
-        dest: /usr/local/bin/nu
-        mode: "0755"
-        remote_src: true
-
-    - name: Add nushell to /etc/shells
-      ansible.builtin.lineinfile:
-        path: /etc/shells
-        line: /usr/local/bin/nu
-        state: present
-
-    - name: Clean up nushell download
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: absent
-      loop:
-        - /tmp/nushell.tar.gz
-        - "/tmp/nu-{{ dev_tools_nushell_version }}-x86_64-unknown-linux-gnu"
-
-# Symlink for /usr/bin/nu path compatibility
-- name: Symlink nushell to /usr/bin/nu
-  ansible.builtin.file:
-    src: /usr/local/bin/nu
-    dest: /usr/bin/nu
-    state: link
+- name: Install zsh
+  ansible.builtin.apt:
+    name: zsh
+    state: present
 
 # ============================================================
 # Helix editor (GitHub release)
@@ -577,12 +531,12 @@
     mode: "0644"
 
 # ============================================================
-# Set nushell as login shell for dev users
+# Set zsh as login shell for dev users
 # ============================================================
-- name: Set nushell as login shell for dev users
+- name: Set zsh as login shell for dev users
   ansible.builtin.user:
     name: "{{ item }}"
-    shell: /usr/local/bin/nu
+    shell: /usr/bin/zsh
   loop: "{{ dev_tools_users }}"
   tags:
     - molecule-notest

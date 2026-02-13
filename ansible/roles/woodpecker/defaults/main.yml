@@ -14,7 +14,7 @@ woodpecker_server_container_name: woodpecker-server
 woodpecker_agent_container_name: woodpecker-agent
 
 woodpecker_open: true
-woodpecker_admins: "abanna,tulilirockz"
+woodpecker_admins: "abanna"
 woodpecker_db_driver: postgres
 woodpecker_log_level: debug
 woodpecker_max_workflows: 10

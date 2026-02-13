@@ -19,8 +19,6 @@
       tags: [woodpecker, ci]
     - role: docker_registry
       tags: [docker_registry, registry]
-    - role: sshx
-      tags: [sshx]
     - role: openvscode
       tags: [openvscode, vscode]
     - role: dev_tools

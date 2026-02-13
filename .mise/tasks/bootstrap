@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="First-time deployment from scratch"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT"
+./bootstrap.sh

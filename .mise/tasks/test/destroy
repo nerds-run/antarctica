@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Destroy test instances for a role"
+# Usage: mise run test:destroy <role_name>
+set -euo pipefail
+
+ROLE="${1:?Usage: mise run test:destroy <role_name>}"
+cd "$MISE_PROJECT_ROOT/ansible/roles/$ROLE"
+molecule destroy

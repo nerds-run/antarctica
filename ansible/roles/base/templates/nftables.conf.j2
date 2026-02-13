@@ -10,6 +10,9 @@ table inet filter {
         # Loopback
         iif "lo" accept
 
+        # Container bridge traffic (Podman DNS + inter-container)
+        iifname "podman*" accept
+
         # Established / related
         ct state established,related accept
 
@@ -28,6 +31,10 @@ table inet filter {
 
     chain forward {
         type filter hook forward priority 0; policy drop;
+
+        # Allow container traffic
+        iifname "podman*" accept
+        oifname "podman*" accept
     }
 
     chain output {

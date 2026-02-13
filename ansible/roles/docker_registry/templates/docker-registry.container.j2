@@ -9,7 +9,7 @@ Wants=network-online.target
 ContainerName={{ docker_registry_container_name }}
 Image={{ docker_registry_image }}
 AutoUpdate=registry
-PublishPort=0.0.0.0:{{ docker_registry_port }}:5000
+PublishPort=127.0.0.1:{{ docker_registry_port }}:5000
 Volume={{ docker_registry_data_dir }}:/var/lib/registry:Z
 Environment=REGISTRY_STORAGE_DELETE_ENABLED={{ docker_registry_delete_enabled | lower }}
 Network={{ container_runtime_network_name | default('antarctica') }}

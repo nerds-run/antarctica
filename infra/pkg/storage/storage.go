@@ -29,8 +29,8 @@ var DataPaths = []string{
 	"/data/woodpecker",
 	"/data/registry",
 	"/data/postgresql",
-	"/data/libvirt",
-	"/data/docker",
+	"/data/caddy",
+	"/data/openvscode",
 }
 
 // ExportDataLayout registers the expected /data subdirectories as a stack

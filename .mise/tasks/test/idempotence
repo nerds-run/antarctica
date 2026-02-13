@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="Run only idempotence check for a role"
+# Usage: mise run test:idempotence <role_name>
+set -euo pipefail
+
+ROLE="${1:?Usage: mise run test:idempotence <role_name>}"
+cd "$MISE_PROJECT_ROOT/ansible/roles/$ROLE"
+molecule converge
+molecule idempotence

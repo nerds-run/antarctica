@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="Initialize development environment"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT"
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+ansible-galaxy install -r ansible/requirements.yml
+pre-commit install
+echo "Development environment ready!"

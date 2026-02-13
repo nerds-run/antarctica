@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Run full-stack integration tests"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT/ansible/tests/integration"
+molecule test

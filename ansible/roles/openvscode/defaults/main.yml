@@ -1,6 +1,6 @@
 ---
 openvscode_image: gitpod/openvscode-server:latest
-openvscode_port: 3000
+openvscode_port: 3100
 openvscode_data_dir: /data/openvscode
 openvscode_container_name: openvscode-server
 openvscode_host: "0.0.0.0"

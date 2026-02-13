@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Tear down infrastructure (DANGEROUS)"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT/infra"
+pulumi destroy --yes --stack dev

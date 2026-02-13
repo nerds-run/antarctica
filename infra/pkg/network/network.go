@@ -32,12 +32,8 @@ var FirewallPorts = []int{
 	22,   // OpenSSH
 	80,   // Caddy HTTP
 	443,  // Caddy HTTPS
-	3030, // Forgejo
-	3040, // Woodpecker HTTP
-	3041, // Woodpecker gRPC
+	2222, // Forgejo Git SSH
 	5000, // Docker Registry
-	5090, // SSHX Redis
-	8051, // SSHX HTTP
 	9090, // Cockpit
 }
 

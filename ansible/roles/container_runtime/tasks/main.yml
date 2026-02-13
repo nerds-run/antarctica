@@ -1,4 +1,65 @@
 ---
+# -- Add alvistack OBS repo for podman 5.x (Quadlet support) --
+- name: Install prerequisites for podman repo
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gnupg
+    state: present
+
+- name: Ensure keyrings directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Download alvistack GPG key
+  ansible.builtin.get_url:
+    url: https://download.opensuse.org/repositories/home:/alvistack/Debian_12/Release.key
+    dest: /etc/apt/keyrings/alvistack.asc
+    mode: "0644"
+
+- name: Dearmor alvistack GPG key # noqa: command-instead-of-module
+  ansible.builtin.command:
+    cmd: gpg --dearmor -o /etc/apt/keyrings/alvistack.gpg /etc/apt/keyrings/alvistack.asc
+    creates: /etc/apt/keyrings/alvistack.gpg
+
+- name: Add alvistack apt repository
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/alvistack.gpg]
+      http://download.opensuse.org/repositories/home:/alvistack/Debian_12/ /
+    filename: alvistack
+    state: present
+    update_cache: true
+
+- name: Pin alvistack repo to low priority (only use for container packages)
+  ansible.builtin.copy:
+    content: |
+      Package: *
+      Pin: origin download.opensuse.org
+      Pin-Priority: 100
+
+      Package: podman buildah crun containers-common conmon fuse-overlayfs slirp4netns
+      Pin: origin download.opensuse.org
+      Pin-Priority: 900
+    dest: /etc/apt/preferences.d/alvistack
+    mode: "0644"
+
+- name: Remove deprecated kubic repo if present
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/kubic-libcontainers.gpg]
+      https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/unstable/Debian_12/ /
+    filename: kubic-libcontainers
+    state: absent
+
+- name: Remove conflicting Debian containers-common package
+  ansible.builtin.apt:
+    name: golang-github-containers-common
+    state: absent
+  failed_when: false
+
 - name: Install podman and buildah
   ansible.builtin.apt:
     name:
@@ -7,8 +68,13 @@
       - slirp4netns
       - crun
       - fuse-overlayfs
+      - netavark
+      - aardvark-dns
       - cron
     state: present
+    dpkg_options: force-overwrite,force-confold
+  environment:
+    DEBIAN_FRONTEND: noninteractive
 
 # -- Registries config --
 - name: Deploy registries.conf

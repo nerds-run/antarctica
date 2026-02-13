@@ -33,7 +33,6 @@ func DefaultRecords() []Record {
 	return []Record{
 		{Subdomain: "forgejo"},
 		{Subdomain: "woodpecker"},
-		{Subdomain: "sshx"},
 		{Subdomain: "registry"},
 		{Subdomain: "vscode"},
 		{Subdomain: "cockpit"},
@@ -41,6 +40,9 @@ func DefaultRecords() []Record {
 }
 
 // CreateRecords creates DNS A records in GCP Cloud DNS for each service.
+// Records are only created when the VM IP is known (non-empty). On the first
+// deploy the QEMU guest agent may not have reported the IP yet; a subsequent
+// `pulumi refresh && pulumi up` will create the records once the IP appears.
 func CreateRecords(ctx *pulumi.Context, cfg Config) error {
 	records := DefaultRecords()
 
@@ -48,12 +50,20 @@ func CreateRecords(ctx *pulumi.Context, cfg Config) error {
 		fqdn := fmt.Sprintf("%s.%s.", rec.Subdomain, cfg.Domain)
 		resourceName := fmt.Sprintf("dns-%s", rec.Subdomain)
 
+		// Only supply rrdatas when the IP is non-empty; GCP rejects empty A records.
+		rrdatas := cfg.IPAddress.ApplyT(func(ip string) []string {
+			if ip == "" {
+				return nil
+			}
+			return []string{ip}
+		}).(pulumi.StringArrayOutput)
+
 		_, err := dns.NewRecordSet(ctx, resourceName, &dns.RecordSetArgs{
 			ManagedZone: pulumi.String(cfg.ManagedZone),
 			Name:        pulumi.String(fqdn),
 			Type:        pulumi.String("A"),
 			Ttl:         pulumi.Int(300),
-			Rrdatas:     pulumi.StringArray{cfg.IPAddress},
+			Rrdatas:     rrdatas,
 		})
 		if err != nil {
 			return fmt.Errorf("creating DNS record for %s: %w", fqdn, err)

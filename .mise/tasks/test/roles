@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#MISE description="Run Molecule tests for all roles"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT"
+for role in ansible/roles/*/; do
+  role_name=$(basename "$role")
+  if [ -d "$role/molecule/default" ]; then
+    echo "==> Testing role: $role_name"
+    (cd "$role" && molecule test) || exit 1
+  fi
+done

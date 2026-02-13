@@ -11,6 +11,12 @@
     state: directory
     mode: "0750"
 
+- name: Create Actions Runner data directory
+  ansible.builtin.file:
+    path: "{{ forgejo_data_dir }}/actions-runner"
+    state: directory
+    mode: "0755"
+
 # -- Fetch secrets from 1Password --
 - name: Retrieve Forgejo secret key from 1Password
   ansible.builtin.command:

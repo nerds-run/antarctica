@@ -3,26 +3,30 @@ environment:
   - dev-nerds-run/gcp
 config:
   # Proxmox connection (credentials from ESC dev-nerds-run/proxmox)
-  antarctica:proxmox_node: pve
+  antarctica:proxmox_node: m0x-01
   # VM settings
   antarctica:vm_id: "200"
-  antarctica:hostname: antarctica
+  antarctica:hostname: antarctica-01
+  antarctica:template_vm_id: "9000"
   antarctica:cpu_cores: "16"
   antarctica:memory_mb: "32768"
   antarctica:boot_disk_gb: "50"
-  antarctica:data_disk_gb: "100"
+  antarctica:data_disk_gb: "180"
   # Cloud-init image template (must already exist on the Proxmox node)
   antarctica:cloud_init_template: debian-12-cloudinit
   # Storage pool for disks
-  antarctica:storage_pool: local-lvm
-  # Network (DHCP - IP assigned by Proxmox/DHCP server)
+  antarctica:storage_pool: shared
+  # Network (static IP)
   antarctica:network_bridge: vmbr0
+  antarctica:ip_address: 172.22.202.50/24
+  antarctica:gateway: 172.22.202.1
   # SSH
   antarctica:ssh_user: antarctica
   antarctica:ssh_port: "22"
   antarctica:ssh_public_keys: |
     ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEGQB1RVrTnUl5JDIs19lzIJVGi60yuXB7zYCcwN/XxZ tulili@studio
     ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIB0Xc+SiOJZ9r3WR+UqeZgOaRYl3ZOTCpcbVfvIHJu3t abanna@pop-os
+    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOG+XlD2ybhcm+VrmC8B7D3TnFymWRQ3GYsfqm+vN+S5 antarctica-deploy
   # GCP DNS
-  antarctica:gcp_dns_zone: dev-nerds-run
+  antarctica:gcp_dns_zone: private-dev-nerds-run
   antarctica:dns_domain: dev.nerds.run

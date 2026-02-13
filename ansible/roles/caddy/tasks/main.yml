@@ -62,7 +62,7 @@
     owner: caddy
     group: caddy
     mode: "0644"
-  notify: Reload caddy
+  register: caddy_config
 
 # -- Enable and start --
 - name: Enable and start Caddy
@@ -70,3 +70,9 @@
     name: caddy
     enabled: true
     state: started
+
+- name: Reload Caddy on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: caddy
+    state: reloaded
+  when: caddy_config is changed

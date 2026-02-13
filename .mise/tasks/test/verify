@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#MISE description="Run verify step only (after converge)"
+# Usage: mise run test:verify <role_name>
+set -euo pipefail
+
+ROLE="${1:?Usage: mise run test:verify <role_name>}"
+cd "$MISE_PROJECT_ROOT/ansible/roles/$ROLE"
+molecule verify

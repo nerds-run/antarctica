@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Deploy only Forgejo changes"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT/ansible"
+ansible-playbook playbooks/forgejo.yml -i inventory/

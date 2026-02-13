@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Lint Pulumi Go code"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT/infra"
+go vet ./...

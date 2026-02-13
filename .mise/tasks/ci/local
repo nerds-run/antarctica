@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Run the full CI pipeline locally"
+#MISE depends=["lint:all", "test:roles", "test:integration"]
+set -euo pipefail

@@ -11,6 +11,5 @@ container_runtime_data_dirs:
   - /data/forgejo
   - /data/woodpecker
   - /data/registry
-  - /data/sshx
 
 container_runtime_prune_schedule: "0 3 * * 0"

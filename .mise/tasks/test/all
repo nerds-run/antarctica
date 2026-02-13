@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Run all tests (lint + molecule)"
+#MISE depends=["lint:all", "test:roles"]
+set -euo pipefail

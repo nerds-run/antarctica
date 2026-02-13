@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE description="Provision infrastructure with Pulumi"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT/infra"
+pulumi up --yes --stack dev
+pulumi stack output --json --stack dev > ../ansible/inventory/pulumi_output.json

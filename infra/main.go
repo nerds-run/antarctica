@@ -39,6 +39,7 @@ func main() {
 		}
 
 		vmID := intConfig(cfg, "vm_id", 200)
+		templateVMID := intConfig(cfg, "template_vm_id", 9000)
 		cpuCores := intConfig(cfg, "cpu_cores", 4)
 		memoryMB := intConfig(cfg, "memory_mb", 8192)
 		bootDiskGB := intConfig(cfg, "boot_disk_gb", 50)
@@ -74,6 +75,7 @@ func main() {
 		vmResult, err := vm.Provision(ctx, vm.Config{
 			Node:              node,
 			VMID:              vmID,
+			TemplateVMID:      templateVMID,
 			Hostname:          hostname,
 			CPUCores:          cpuCores,
 			MemoryMB:          memoryMB,

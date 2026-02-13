@@ -52,7 +52,6 @@ dev_tools_npm_packages:
 
 # -- Binary releases (architecture-aware) --
 # These are installed to /usr/local/bin
-dev_tools_nushell_version: "0.101.0"
 dev_tools_helix_version: "25.01.1"
 dev_tools_zellij_version: "0.41.2"
 dev_tools_atuin_version: "18.4.0"
@@ -79,4 +78,3 @@ dev_tools_helix_theme: boo_berry
 dev_tools_users:
   - antarctica
   - abanna
-  - tulili
