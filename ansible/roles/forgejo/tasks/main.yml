@@ -285,3 +285,13 @@
   when: item is not skipped
   tags:
     - molecule-notest
+
+- name: Clean up ansible provisioning tokens # noqa: no-changed-when
+  ansible.builtin.command:
+    cmd: >-
+      podman exec {{ forgejo_db_container_name }}
+      psql -U {{ forgejo_db_user }} -d {{ forgejo_db_name }}
+      -c "DELETE FROM access_token WHERE name LIKE 'ansible-%'"
+  failed_when: false
+  tags:
+    - molecule-notest
