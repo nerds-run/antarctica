@@ -1,4 +1,10 @@
 ---
+clone:
+  - name: clone
+    image: woodpeckerci/plugin-git
+    settings:
+      skip_verify: true
+
 when:
   - event: [push, pull_request]
 
