@@ -42,6 +42,7 @@ provisioner:
       all:
         ansible_python_interpreter: /usr/bin/python3
         postgresql_password: "test-db-password-12345"
+        forgejo_db_password: "test-db-password-12345"
         forgejo_secret_key: "test-forgejo-secret-key"
         forgejo_internal_token: "test-forgejo-internal-token"
         forgejo_oauth2_jwt_secret: "test-forgejo-oauth2-jwt"
