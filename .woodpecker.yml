@@ -10,12 +10,12 @@ when:
 
 steps:
   - name: lint-yaml
-    image: cytopia/yamllint:latest
+    image: docker.io/cytopia/yamllint:latest
     commands:
       - yamllint -c .yamllint ansible/
 
   - name: lint-ansible
-    image: pipelinecomponents/ansible-lint:latest
+    image: docker.io/pipelinecomponents/ansible-lint:latest
     environment:
       ANSIBLE_CONFIG: ansible/ansible.cfg
       ANSIBLE_ROLES_PATH: ansible/roles
