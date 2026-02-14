@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install yamllint
+      - run: pip install --break-system-packages yamllint
       - run: yamllint -c .yamllint ansible/
 
   ansible-lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install ansible-core ansible-lint
+      - run: pip install --break-system-packages ansible-core ansible-lint
       - run: ansible-lint --profile production ansible/
         env:
           ANSIBLE_CONFIG: ansible/ansible.cfg
