@@ -5,6 +5,11 @@ result*
 # Pulumi
 infra/go.sum
 infra/.pulumi/
+infra/antarctica-infra
+infra/infra
+
+# Claude Code
+.claude/
 
 # Ansible
 ansible/inventory/pulumi_output.json
