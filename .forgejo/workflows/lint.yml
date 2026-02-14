@@ -9,19 +9,16 @@ name: Lint
 jobs:
   yamllint:
     runs-on: ubuntu-latest
-    container:
-      image: docker.io/cytopia/yamllint:latest
     steps:
       - uses: actions/checkout@v4
+      - run: pip install yamllint
       - run: yamllint -c .yamllint ansible/
 
   ansible-lint:
     runs-on: ubuntu-latest
-    container:
-      image: docker.io/pipelinecomponents/ansible-lint:latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install ansible-core>=2.17
+      - run: pip install ansible-core ansible-lint
       - run: ansible-lint --profile production ansible/
         env:
           ANSIBLE_CONFIG: ansible/ansible.cfg
