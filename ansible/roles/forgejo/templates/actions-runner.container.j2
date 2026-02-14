@@ -11,7 +11,7 @@ ContainerName={{ forgejo_actions_runner_container_name }}
 Image={{ forgejo_actions_runner_image }}
 AutoUpdate=registry
 EnvironmentFile={{ forgejo_actions_runner_config_dir }}/action-runner.env
-Environment=GITEA_INSTANCE_URL=https://{{ forgejo_domain }}
+Environment=GITEA_INSTANCE_URL=http://{{ forgejo_container_name }}:3000
 Environment=GITEA_RUNNER_NAME={{ forgejo_actions_runner_name }}
 Environment=GITEA_RUNNER_CAPACITY={{ forgejo_actions_runner_capacity }}
 Environment=GITEA_RUNNER_JOB_TIMEOUT={{ forgejo_actions_runner_timeout }}
