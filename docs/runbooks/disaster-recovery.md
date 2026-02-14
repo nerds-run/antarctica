@@ -39,16 +39,17 @@ Data directories to restore:
 | Directory | Contents |
 |---|---|
 | `/data/forgejo` | Git repositories, LFS objects, Forgejo config |
+| `/data/forgejo-postgresql` | Forgejo PostgreSQL database files |
 | `/data/postgresql` | PostgreSQL database files |
 | `/data/woodpecker` | Woodpecker server data |
 | `/data/caddy` | Caddy TLS certificates and state |
 | `/data/registry` | Docker registry image layers |
-| `/data/sshx` | SSHX state |
+| `/data/openvscode` | OpenVSCode Server data |
 
 #### If using restic
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 # Restore all data directories
 sudo restic -r <repo-url> restore latest --target /
@@ -62,10 +63,10 @@ sudo restic -r <repo-url> restore latest --target / --include /data/postgresql
 
 ```bash
 # Copy backup archive to server
-scp backup-YYYY-MM-DD.tar.gz deploy@antarctica.dev.nerds.run:/tmp/
+scp backup-YYYY-MM-DD.tar.gz antarctica@172.22.202.50:/tmp/
 
 # SSH in and extract
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 sudo tar xzf /tmp/backup-YYYY-MM-DD.tar.gz -C /
 rm /tmp/backup-YYYY-MM-DD.tar.gz
 ```
@@ -75,7 +76,7 @@ rm /tmp/backup-YYYY-MM-DD.tar.gz
 If restoring from a `pg_dump` SQL file instead of a filesystem backup:
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 # Copy the dump into the container
 sudo podman cp woodpecker.sql postgresql:/tmp/woodpecker.sql
@@ -87,7 +88,7 @@ sudo podman exec -it postgresql psql -U woodpecker -d woodpecker -f /tmp/woodpec
 ### 5. Restart all services
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 sudo systemctl restart postgresql
 sudo systemctl restart forgejo
@@ -107,7 +108,7 @@ mise run deploy:validate
 Or manually check on the server:
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 sudo podman ps
 curl -s http://127.0.0.1:3000/api/v1/version

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+#MISE description="Show status of all services on the server"
+set -euo pipefail
+
+KEY_FILE="${ANTARCTICA_SSH_KEY:-/tmp/antarctica-deploy.key}"
+HOST="${ANTARCTICA_HOST:-172.22.202.50}"
+
+if [ ! -f "$KEY_FILE" ]; then
+  mise run deploy:ssh-key
+fi
+
+echo "=== Container Status ==="
+ssh -i "$KEY_FILE" -o StrictHostKeyChecking=accept-new "antarctica@$HOST" sudo podman ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+echo ""
+echo "=== Caddy Status ==="
+ssh -i "$KEY_FILE" -o StrictHostKeyChecking=accept-new "antarctica@$HOST" sudo systemctl is-active caddy
+
+echo ""
+echo "=== Systemd Services ==="
+ssh -i "$KEY_FILE" -o StrictHostKeyChecking=accept-new "antarctica@$HOST" sudo systemctl is-active forgejo woodpecker-server woodpecker-agent postgresql forgejo-postgresql caddy

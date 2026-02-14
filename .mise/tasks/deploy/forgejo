@@ -3,4 +3,4 @@
 set -euo pipefail
 
 cd "$MISE_PROJECT_ROOT/ansible"
-ANSIBLE_ROLES_PATH=roles ansible-playbook playbooks/forgejo.yml -i inventory/
+ansible-playbook playbooks/forgejo.yml -i inventory/

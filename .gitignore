@@ -3,7 +3,6 @@ result*
 *.qcow2
 
 # Pulumi
-infra/go.sum
 infra/.pulumi/
 infra/antarctica-infra
 infra/infra

@@ -17,10 +17,10 @@ cat ~/.ssh/id_ed25519.pub
 
 ### 2. Edit the group vars
 
-Open `ansible/inventory/group_vars/antarctica.yml` and add the user to the `users` list:
+Open `ansible/inventory/group_vars/antarctica.yml` and add the user to the `base_users` list:
 
 ```yaml
-users:
+base_users:
   # ... existing users ...
   - name: newuser
     groups: "sudo,libvirt,kvm"
@@ -29,10 +29,10 @@ users:
       - "ssh-ed25519 AAAA... newuser@hostname"
 ```
 
-If the user should also have root SSH access, add their key to `root_ssh_keys`:
+If the user should also have root SSH access, add their key to `base_root_ssh_keys`:
 
 ```yaml
-root_ssh_keys:
+base_root_ssh_keys:
   # ... existing keys ...
   - "ssh-ed25519 AAAA... newuser@hostname"
 ```
@@ -57,8 +57,8 @@ mise run deploy:validate
 
 ## Removing a user
 
-1. Remove the user entry from `users` in `antarctica.yml`
-2. Remove their key from `root_ssh_keys` if present
+1. Remove the user entry from `base_users` in `antarctica.yml`
+2. Remove their key from `base_root_ssh_keys` if present
 3. Run `mise run deploy:base`
 4. Optionally SSH in and remove their home directory: `sudo userdel -r newuser`
 

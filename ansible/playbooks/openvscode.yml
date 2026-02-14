@@ -1,0 +1,12 @@
+---
+- name: Antarctica OpenVSCode Server deployment
+  hosts: antarctica
+  become: true
+
+  roles:
+    - role: container_runtime
+      tags: [container_runtime]
+    - role: openvscode
+      tags: [openvscode]
+    - role: caddy
+      tags: [caddy]

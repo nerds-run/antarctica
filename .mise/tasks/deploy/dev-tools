@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Deploy only dev tools changes"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT/ansible"
+ansible-playbook playbooks/dev_tools.yml -i inventory/

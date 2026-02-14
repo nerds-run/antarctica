@@ -1,0 +1,8 @@
+---
+- name: Antarctica dev tools deployment
+  hosts: antarctica
+  become: true
+
+  roles:
+    - role: dev_tools
+      tags: [dev_tools]

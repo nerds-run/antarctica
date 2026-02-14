@@ -1,3 +1,7 @@
+> **Note:** This document is a historical reference from the NixOS-to-Ansible migration.
+> The current server state may differ from what is described here. For current configuration,
+> refer to `ansible/inventory/group_vars/antarctica.yml` and the role defaults.
+
 # Antarctica NixOS-to-Ansible Migration Inventory
 
 Complete inventory of the Antarctica NixOS server, extracted from all `.nix` configuration files. This document serves as the authoritative reference for building Ansible roles and Pulumi infrastructure.

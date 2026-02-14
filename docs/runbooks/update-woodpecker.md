@@ -13,7 +13,7 @@ Both should run the same version. Always update them together.
 Both containers use the `latest` tag by default. Podman auto-update handles pulling new images:
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 sudo podman auto-update
 ```
 
@@ -22,7 +22,7 @@ sudo podman auto-update
 ### 1. Pull new images
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 sudo podman pull docker.io/woodpeckerci/woodpecker-server:latest
 sudo podman pull docker.io/woodpeckerci/woodpecker-agent:latest
 ```
@@ -71,7 +71,7 @@ mise run deploy:woodpecker
 ### Quick rollback (on the server)
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 sudo systemctl stop woodpecker-agent
 sudo systemctl stop woodpecker-server

@@ -63,9 +63,13 @@ Antarctica is migrating from a NixOS-based server to **Debian 12 (Bookworm)** ma
 ```
 Internet --> Caddy (:443) --> Forgejo (:3000)
                           --> Woodpecker (:3040)
+                          --> Docker Registry (:5000)
+                          --> OpenVSCode Server (:3100)
 
+Forgejo --> Forgejo PostgreSQL (:5433)
 Forgejo webhooks --> Woodpecker Server --> Woodpecker Agent
                                       --> PostgreSQL (:5432)
+Forgejo Actions --> Actions Runner
 
 Git SSH --> Forgejo (:2222)
 ```
@@ -88,7 +92,7 @@ Install these tools on your **local workstation** before deploying:
 You also need:
 
 - SSH key added to the server (ed25519 recommended)
-- 1Password access to the **Antarctica** vault
+- 1Password access to the **Infrastructure** vault (items prefixed with `antiarctica_`)
 - Proxmox API credentials (for Pulumi)
 
 ---
@@ -203,11 +207,11 @@ mise run deploy:base
 
 ### Add a new secret
 
-1. Create the secret in the **Antarctica** vault in 1Password
+1. Create the secret in the **Infrastructure** vault in 1Password (with `antiarctica_` prefix)
 2. Add the `op://` reference to `ansible/inventory/group_vars/antarctica.yml`:
 
 ```yaml
-op_new_secret: "op://Antarctica/service-name/field-name"
+op_new_secret: "op://Infrastructure/antiarctica_service-name/field-name"
 ```
 
 3. Reference it in the relevant Ansible role template
@@ -268,7 +272,7 @@ If a container image update causes issues:
 
 ```bash
 # SSH into the server
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 # Check current image
 sudo podman inspect forgejo --format '{{.ImageName}}'
@@ -372,7 +376,9 @@ sudo podman exec postgresql pg_isready -U woodpecker
 
 ```
 antarctica/
-  tasks.toml              # mise task definitions
+  mise.toml               # Tool versions and env vars
+  .mise/tasks/            # mise task scripts
+  .forgejo/workflows/      # CI workflow definitions
   docs/
     INVENTORY.md           # Full NixOS-to-Ansible migration inventory
     MIGRATION.md           # This file
@@ -388,6 +394,10 @@ antarctica/
       forgejo.yml          # Forgejo only
       woodpecker.yml       # Woodpecker only
       caddy.yml            # Caddy only
+      postgresql.yml       # PostgreSQL only
+      docker_registry.yml  # Docker Registry only
+      openvscode.yml       # OpenVSCode Server only
+      dev_tools.yml        # Dev tools only
       validate.yml         # Validation checks
     inventory/
       hosts.yml            # Host inventory
@@ -400,5 +410,7 @@ antarctica/
       postgresql/          # Database container
       forgejo/             # Git forge
       woodpecker/          # CI server + agent
+      docker_registry/     # Container image registry
+      openvscode/          # Browser-based IDE
       dev_tools/           # Developer packages
 ```

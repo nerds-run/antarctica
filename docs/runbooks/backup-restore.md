@@ -5,11 +5,12 @@
 | Directory | Contents | Priority |
 |---|---|---|
 | `/data/forgejo` | Git repos, LFS objects, avatars, attachments | Critical |
+| `/data/forgejo-postgresql` | Forgejo PostgreSQL database files | Critical |
 | `/data/postgresql` | PostgreSQL database (Woodpecker data) | Critical |
 | `/data/woodpecker` | Woodpecker server state | High |
 | `/data/caddy` | TLS certificates, OCSP staples | Medium (auto-regenerated) |
 | `/data/registry` | Docker registry layers | Medium (can be rebuilt) |
-| `/data/sshx` | SSHX state | Low |
+| `/data/openvscode` | OpenVSCode Server data | Low |
 
 ## Backup methods
 
@@ -18,7 +19,7 @@
 Creates a complete Forgejo backup including repos, database, and config:
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 # Run Forgejo dump
 sudo podman exec forgejo forgejo dump \
@@ -32,7 +33,7 @@ sudo podman cp forgejo:/tmp/forgejo-dump-*.zip /data/backups/
 ### PostgreSQL dump
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 # SQL dump
 sudo podman exec postgresql pg_dump \
@@ -65,10 +66,12 @@ sudo restic init --repo /backup/antarctica
 sudo restic backup \
   --repo /backup/antarctica \
   /data/forgejo \
+  /data/forgejo-postgresql \
   /data/postgresql \
   /data/woodpecker \
   /data/caddy \
-  /data/registry
+  /data/registry \
+  /data/openvscode
 
 # List snapshots
 sudo restic snapshots --repo /backup/antarctica
@@ -95,10 +98,12 @@ Example `/etc/borgmatic/config.yaml`:
 ```yaml
 source_directories:
   - /data/forgejo
+  - /data/forgejo-postgresql
   - /data/postgresql
   - /data/woodpecker
   - /data/caddy
   - /data/registry
+  - /data/openvscode
 
 repositories:
   - path: /backup/antarctica
@@ -133,7 +138,7 @@ hooks:
 0 */6 * * * root podman exec postgresql pg_dump -U woodpecker -d woodpecker --format=custom -f /data/backups/woodpecker-$(date +\%Y\%m\%d-\%H\%M).pgdump
 
 # Restic filesystem backup at 2 AM daily
-0 2 * * * root restic backup --repo /backup/antarctica /data/forgejo /data/postgresql /data/woodpecker /data/caddy /data/registry --quiet
+0 2 * * * root restic backup --repo /backup/antarctica /data/forgejo /data/forgejo-postgresql /data/postgresql /data/woodpecker /data/caddy /data/registry /data/openvscode --quiet
 
 # Cleanup old PostgreSQL dumps (keep 7 days)
 0 3 * * * root find /data/backups -name '*.pgdump' -mtime +7 -delete
@@ -147,7 +152,7 @@ hooks:
 ### Restore PostgreSQL from dump
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 # Stop services that use the database
 sudo systemctl stop woodpecker-server
@@ -172,7 +177,7 @@ sudo systemctl start woodpecker-server
 ### Restore Forgejo from dump
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 # Stop Forgejo
 sudo systemctl stop forgejo
@@ -191,7 +196,7 @@ sudo systemctl start forgejo
 ### Restore from restic
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 # List available snapshots
 sudo restic snapshots --repo /backup/antarctica

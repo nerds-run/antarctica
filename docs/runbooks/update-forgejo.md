@@ -2,12 +2,12 @@
 
 ## Automatic updates (recommended)
 
-Forgejo runs as a Podman Quadlet container with the `latest` tag by default. Podman auto-update pulls new images automatically when configured.
+Forgejo runs as a Podman Quadlet container with the `14` tag by default. Podman auto-update pulls new images automatically when configured.
 
 To trigger a manual auto-update check:
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 sudo podman auto-update
 ```
 
@@ -16,8 +16,8 @@ sudo podman auto-update
 ### 1. Pull the new image
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
-sudo podman pull codeberg.org/forgejo/forgejo:latest
+ssh antarctica@172.22.202.50
+sudo podman pull codeberg.org/forgejo/forgejo:14
 ```
 
 ### 2. Restart the service
@@ -66,7 +66,7 @@ If a new version causes problems:
 ### Quick rollback (on the server)
 
 ```bash
-ssh deploy@antarctica.dev.nerds.run
+ssh antarctica@172.22.202.50
 
 # Stop the current container
 sudo systemctl stop forgejo
