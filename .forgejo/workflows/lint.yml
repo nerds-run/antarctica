@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install --break-system-packages ansible-core ansible-lint
-      - run: ansible-galaxy collection install -r ansible/requirements.yml
+      - run: ansible-galaxy collection install -r ansible/requirements.yml -p ansible/collections
       - run: ansible-lint --profile production ansible/
         env:
           ANSIBLE_CONFIG: ansible/ansible.cfg
