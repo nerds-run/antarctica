@@ -15,8 +15,10 @@ Environment=GITEA_INSTANCE_URL=http://{{ forgejo_container_name }}:3000
 Environment=GITEA_RUNNER_NAME={{ forgejo_actions_runner_name }}
 Environment=GITEA_RUNNER_CAPACITY={{ forgejo_actions_runner_capacity }}
 Environment=GITEA_RUNNER_JOB_TIMEOUT={{ forgejo_actions_runner_timeout }}
+Exec=--config /config/actions-runner-config.yaml
 Volume=/run/podman/podman.sock:/var/run/docker.sock:Z
 Volume={{ forgejo_data_dir }}/actions-runner:/data:Z
+Volume={{ forgejo_actions_runner_config_dir }}/actions-runner-config.yaml:/config/actions-runner-config.yaml:ro,Z
 SecurityLabelDisable=true
 Network={{ container_runtime_network_name | default('antarctica') }}
 

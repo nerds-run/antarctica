@@ -149,6 +149,13 @@
   no_log: true
   register: forgejo_actions_runner_env
 
+- name: Deploy Actions Runner config file
+  ansible.builtin.template:
+    src: actions-runner-config.yaml.j2
+    dest: "{{ forgejo_actions_runner_config_dir }}/actions-runner-config.yaml"
+    mode: "0644"
+  register: forgejo_actions_runner_config
+
 - name: Deploy Gitea Actions Runner quadlet container file
   ansible.builtin.template:
     src: actions-runner.container.j2
@@ -207,7 +214,7 @@
   ansible.builtin.systemd:
     name: actions-runner
     state: restarted
-  when: forgejo_actions_runner_env is changed or forgejo_actions_runner_quadlet is changed
+  when: forgejo_actions_runner_env is changed or forgejo_actions_runner_quadlet is changed or forgejo_actions_runner_config is changed
   tags:
     - molecule-notest
 
