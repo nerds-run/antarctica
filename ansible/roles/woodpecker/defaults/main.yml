@@ -26,7 +26,7 @@ woodpecker_postgresql_user: woodpecker
 woodpecker_postgresql_port: 5432
 
 # 1Password references
-woodpecker_op_postgresql_password: "op://Antarctica/postgresql/password"
-woodpecker_op_agent_secret: "op://Antarctica/woodpecker/agent-secret"
-woodpecker_op_gitea_client: "op://Antarctica/woodpecker/gitea-client"
-woodpecker_op_gitea_secret: "op://Antarctica/woodpecker/gitea-secret"
+woodpecker_op_postgresql_password: "op://Infrastructure/antiarctica_postgresql/password"
+woodpecker_op_agent_secret: "op://Infrastructure/antiarctica_woodpecker/agent-secret"
+woodpecker_op_gitea_client: "op://Infrastructure/antiarctica_woodpecker/gitea-client"
+woodpecker_op_gitea_secret: "op://Infrastructure/antiarctica_woodpecker/gitea-secret"

@@ -58,6 +58,7 @@ base_deploy_user: deploy
 base_data_root: /data
 base_data_dirs:
   - /data/forgejo
+  - /data/forgejo-postgresql
   - /data/woodpecker
   - /data/postgresql
   - /data/caddy
@@ -82,6 +83,9 @@ forgejo_image: codeberg.org/forgejo/forgejo:14
 forgejo_lfs_enabled: true
 forgejo_default_actions_url: "https://github.com"
 forgejo_webhook_allowed_hosts: "external,loopback,woodpecker.dev.nerds.run"
+forgejo_db_image: docker.io/library/postgres:16-bookworm
+forgejo_db_name: forgejo
+forgejo_db_user: forgejo
 
 # -- Woodpecker --
 woodpecker_server_image: docker.io/woodpeckerci/woodpecker-server:latest
@@ -109,6 +113,7 @@ postgresql_op_password: "op://Infrastructure/antiarctica_postgresql/password"
 woodpecker_op_agent_secret: "op://Infrastructure/antiarctica_woodpecker/agent-secret"
 woodpecker_op_gitea_client: "op://Infrastructure/antiarctica_woodpecker/gitea-client"
 woodpecker_op_gitea_secret: "op://Infrastructure/antiarctica_woodpecker/gitea-secret"
+forgejo_op_db_password: "op://Infrastructure/antiarctica_forgejo/db-password"
 forgejo_op_secret_key: "op://Infrastructure/antiarctica_forgejo/secret-key"
 forgejo_op_internal_token: "op://Infrastructure/antiarctica_forgejo/internal-token"
 forgejo_op_oauth2_jwt_secret: "op://Infrastructure/antiarctica_forgejo/oauth2-jwt-secret"

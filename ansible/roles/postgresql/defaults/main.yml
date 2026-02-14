@@ -7,4 +7,4 @@ postgresql_data_dir: /data/postgresql
 postgresql_container_name: postgresql
 
 # 1Password reference for password
-postgresql_op_password: "op://Antarctica/postgresql/password"
+postgresql_op_password: "op://Infrastructure/antiarctica_postgresql/password"

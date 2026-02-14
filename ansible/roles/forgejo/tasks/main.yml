@@ -11,6 +11,12 @@
     state: directory
     mode: "0750"
 
+- name: Create Forgejo PostgreSQL data directory
+  ansible.builtin.file:
+    path: "{{ forgejo_db_data_dir }}"
+    state: directory
+    mode: "0700"
+
 - name: Create Actions Runner data directory
   ansible.builtin.file:
     path: "{{ forgejo_data_dir }}/actions-runner"
@@ -18,6 +24,24 @@
     mode: "0755"
 
 # -- Fetch secrets from 1Password --
+- name: Retrieve Forgejo database password from 1Password
+  ansible.builtin.command:
+    cmd: "op read '{{ forgejo_op_db_password }}'"
+  register: forgejo_db_password_result
+  changed_when: false
+  no_log: true
+  delegate_to: localhost
+  become: false
+  tags:
+    - molecule-notest
+
+- name: Set Forgejo database password fact
+  ansible.builtin.set_fact:
+    forgejo_db_password: "{{ forgejo_db_password_result.stdout }}"
+  no_log: true
+  tags:
+    - molecule-notest
+
 - name: Retrieve Forgejo secret key from 1Password
   ansible.builtin.command:
     cmd: "op read '{{ forgejo_op_secret_key }}'"
@@ -71,6 +95,15 @@
   no_log: true
   tags:
     - molecule-notest
+
+# -- Forgejo PostgreSQL Quadlet --
+- name: Deploy Forgejo PostgreSQL quadlet container file
+  ansible.builtin.template:
+    src: forgejo-postgresql.container.j2
+    dest: /etc/containers/systemd/forgejo-postgresql.container
+    mode: "0644"
+  no_log: true
+  register: forgejo_db_quadlet
 
 # -- Env file --
 - name: Deploy Forgejo env file
@@ -130,6 +163,14 @@
   tags:
     - molecule-notest
 
+- name: Enable and start Forgejo PostgreSQL container
+  ansible.builtin.systemd:
+    name: forgejo-postgresql
+    enabled: true
+    state: started
+  tags:
+    - molecule-notest
+
 - name: Enable and start Forgejo container
   ansible.builtin.systemd:
     name: forgejo
@@ -146,6 +187,14 @@
   tags:
     - molecule-notest
 
+- name: Restart Forgejo PostgreSQL on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: forgejo-postgresql
+    state: restarted
+  when: forgejo_db_quadlet is changed
+  tags:
+    - molecule-notest
+
 - name: Restart Forgejo on config change # noqa: no-handler
   ansible.builtin.systemd:
     name: forgejo
@@ -159,5 +208,80 @@
     name: actions-runner
     state: restarted
   when: forgejo_actions_runner_env is changed or forgejo_actions_runner_quadlet is changed
+  tags:
+    - molecule-notest
+
+# -- OAuth2 application provisioning --
+- name: Wait for Forgejo API to be ready
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ forgejo_http_port }}/api/v1/settings/api"
+    method: GET
+    status_code: 200
+  register: forgejo_api_health
+  until: forgejo_api_health.status == 200
+  retries: 15
+  delay: 2
+  tags:
+    - molecule-notest
+
+- name: Generate Forgejo API token for provisioning # noqa: no-changed-when
+  ansible.builtin.shell:
+    cmd: >-
+      podman exec --user git {{ forgejo_container_name }}
+      forgejo admin user generate-access-token
+      --username {{ forgejo_admin_user }}
+      --token-name "ansible-$(date +%s)"
+      --scopes all
+  register: forgejo_token_result
+  tags:
+    - molecule-notest
+
+- name: Set API token fact
+  ansible.builtin.set_fact:
+    forgejo_api_token: "{{ forgejo_token_result.stdout | regex_search('Access token was successfully created: (.+)', '\\1') | first }}"
+  no_log: true
+  tags:
+    - molecule-notest
+
+- name: List existing OAuth2 applications
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ forgejo_http_port }}/api/v1/user/applications/oauth2"
+    method: GET
+    headers:
+      Authorization: "token {{ forgejo_api_token }}"
+    status_code: 200
+  register: forgejo_existing_oauth2_apps
+  no_log: true
+  tags:
+    - molecule-notest
+
+- name: Create OAuth2 applications
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ forgejo_http_port }}/api/v1/user/applications/oauth2"
+    method: POST
+    headers:
+      Authorization: "token {{ forgejo_api_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      name: "{{ item.name }}"
+      redirect_uris: "{{ item.redirect_uris }}"
+      confidential_client: true
+    status_code: 201
+  register: forgejo_oauth2_created
+  loop: "{{ forgejo_oauth2_apps }}"
+  when: item.name not in (forgejo_existing_oauth2_apps.json | map(attribute='name') | list)
+  no_log: true
+  tags:
+    - molecule-notest
+
+- name: Display OAuth2 credentials to store in 1Password
+  ansible.builtin.debug:
+    msg: >-
+      Store in 1Password vault '{{ item.item.op_vault }}' item '{{ item.item.op_item }}':
+      {{ item.item.op_client_field }}={{ item.json.client_id }}
+      {{ item.item.op_secret_field }}={{ item.json.client_secret }}
+  loop: "{{ forgejo_oauth2_created.results }}"
+  when: item is not skipped
   tags:
     - molecule-notest
