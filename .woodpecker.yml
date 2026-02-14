@@ -16,6 +16,9 @@ steps:
 
   - name: lint-ansible
     image: pipelinecomponents/ansible-lint:latest
+    environment:
+      ANSIBLE_CONFIG: ansible/ansible.cfg
+      ANSIBLE_ROLES_PATH: ansible/roles
     commands:
       - pip install ansible-core>=2.17
       - ansible-lint --profile production ansible/
