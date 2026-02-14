@@ -82,7 +82,7 @@ postgresql_user: woodpecker
 forgejo_image: codeberg.org/forgejo/forgejo:14
 forgejo_lfs_enabled: true
 forgejo_default_actions_url: "https://github.com"
-forgejo_webhook_allowed_hosts: "external,loopback,woodpecker.dev.nerds.run"
+forgejo_webhook_allowed_hosts: "external,loopback,private,woodpecker.dev.nerds.run"
 forgejo_db_image: docker.io/library/postgres:16-bookworm
 forgejo_db_name: forgejo
 forgejo_db_user: forgejo
