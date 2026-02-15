@@ -1,0 +1,74 @@
+---
+- name: Verify base role
+  hosts: all
+  become: true
+  tasks:
+    - name: Check unattended-upgrades is installed
+      ansible.builtin.package:
+        name: unattended-upgrades
+        state: present
+      check_mode: true
+      register: base_unattended
+      failed_when: base_unattended is changed
+
+    - name: Check nftables is installed
+      ansible.builtin.package:
+        name: nftables
+        state: present
+      check_mode: true
+      register: base_nftables_pkg
+      failed_when: base_nftables_pkg is changed
+
+    - name: Verify data root exists
+      ansible.builtin.stat:
+        path: /data
+      register: base_data_root_check
+
+    - name: Assert data root exists
+      ansible.builtin.assert:
+        that:
+          - base_data_root_check.stat.exists
+          - base_data_root_check.stat.isdir
+        fail_msg: "/data directory does not exist"
+
+    - name: Check deploy user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: deploy
+      register: base_deploy_user_check
+
+    - name: Assert deploy user exists
+      ansible.builtin.assert:
+        that:
+          - base_deploy_user_check is not failed
+        fail_msg: "Deploy user does not exist"
+
+    - name: Check locale is set
+      ansible.builtin.command: locale -a
+      register: base_locale_check
+      changed_when: false
+
+    - name: Assert en_US.UTF-8 locale exists
+      ansible.builtin.assert:
+        that:
+          - "'en_US.utf8' in base_locale_check.stdout"
+        fail_msg: "en_US.UTF-8 locale not generated"
+
+    - name: Check MOTD exists
+      ansible.builtin.stat:
+        path: /etc/motd
+      register: base_motd_check
+
+    - name: Assert MOTD exists
+      ansible.builtin.assert:
+        that:
+          - base_motd_check.stat.exists
+        fail_msg: "MOTD file does not exist"
+
+    - name: Check qemu-guest-agent is installed
+      ansible.builtin.package:
+        name: qemu-guest-agent
+        state: present
+      check_mode: true
+      register: base_qga_pkg
+      failed_when: base_qga_pkg is changed

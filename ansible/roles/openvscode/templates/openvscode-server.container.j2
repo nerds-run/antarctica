@@ -1,0 +1,22 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=OpenVSCode Server (Podman Quadlet)
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+ContainerName={{ openvscode_container_name }}
+Image={{ openvscode_image }}
+AutoUpdate=registry
+PublishPort=127.0.0.1:{{ openvscode_port }}:3000
+Volume={{ openvscode_data_dir }}:/home/workspace:Z
+Network={{ container_runtime_network_name | default('antarctica') }}
+Exec=--host {{ openvscode_host }} --without-connection-token
+
+[Service]
+Restart=always
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target default.target

@@ -1,0 +1,67 @@
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: ${MOLECULE_PROJECT_DIRECTORY}/../../requirements.yml
+
+driver:
+  name: podman
+
+platforms:
+  - name: "molecule-woodpecker-debian12"
+    image: "docker.io/geerlingguy/docker-debian12-ansible:latest"
+    pre_build_image: true
+    privileged: true
+    command: /usr/sbin/init
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    tmpfs:
+      /run: rw
+      /tmp: rw
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
+  options:
+    skip-tags: molecule-notest
+  config_options:
+    defaults:
+      callbacks_enabled: timer, profile_tasks
+      stdout_callback: ansible.builtin.default
+      callback_result_format: yaml
+    diff:
+      always: true
+  playbooks:
+    prepare: prepare.yml
+    converge: converge.yml
+    verify: verify.yml
+  inventory:
+    group_vars:
+      all:
+        ansible_python_interpreter: /usr/bin/python3
+        postgresql_password: "test-db-password-12345"
+        woodpecker_pg_password: "test-db-password-12345"
+        woodpecker_agent_secret: "test-agent-secret-67890"
+        woodpecker_gitea_client: "test-gitea-client-abcde"
+        woodpecker_gitea_secret: "test-gitea-secret-fghij"
+
+verifier:
+  name: ansible
+
+scenario:
+  name: default
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy

@@ -1,0 +1,140 @@
+---
+- name: Create Woodpecker data directory
+  ansible.builtin.file:
+    path: "{{ woodpecker_data_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Create Woodpecker config directory
+  ansible.builtin.file:
+    path: "{{ woodpecker_config_dir }}"
+    state: directory
+    mode: "0750"
+
+# -- Fetch secrets from 1Password --
+- name: Retrieve PostgreSQL password from 1Password
+  ansible.builtin.command:
+    cmd: "op read '{{ woodpecker_op_postgresql_password }}'"
+  register: woodpecker_pg_password_result
+  changed_when: false
+  no_log: true
+  delegate_to: localhost
+  become: false
+  tags:
+    - molecule-notest
+
+- name: Retrieve Woodpecker agent secret from 1Password
+  ansible.builtin.command:
+    cmd: "op read '{{ woodpecker_op_agent_secret }}'"
+  register: woodpecker_agent_secret_result
+  changed_when: false
+  no_log: true
+  delegate_to: localhost
+  become: false
+  tags:
+    - molecule-notest
+
+- name: Retrieve Woodpecker Gitea client from 1Password
+  ansible.builtin.command:
+    cmd: "op read '{{ woodpecker_op_gitea_client }}'"
+  register: woodpecker_gitea_client_result
+  changed_when: false
+  no_log: true
+  delegate_to: localhost
+  become: false
+  tags:
+    - molecule-notest
+
+- name: Retrieve Woodpecker Gitea secret from 1Password
+  ansible.builtin.command:
+    cmd: "op read '{{ woodpecker_op_gitea_secret }}'"
+  register: woodpecker_gitea_secret_result
+  changed_when: false
+  no_log: true
+  delegate_to: localhost
+  become: false
+  tags:
+    - molecule-notest
+
+- name: Set Woodpecker secret facts
+  ansible.builtin.set_fact:
+    woodpecker_pg_password: "{{ woodpecker_pg_password_result.stdout }}"
+    woodpecker_agent_secret: "{{ woodpecker_agent_secret_result.stdout }}"
+    woodpecker_gitea_client: "{{ woodpecker_gitea_client_result.stdout }}"
+    woodpecker_gitea_secret: "{{ woodpecker_gitea_secret_result.stdout }}"
+  no_log: true
+  tags:
+    - molecule-notest
+
+# -- Server env file --
+- name: Deploy Woodpecker server env file
+  ansible.builtin.template:
+    src: woodpecker-server.env.j2
+    dest: "{{ woodpecker_config_dir }}/woodpecker-server.env"
+    mode: "0600"
+  no_log: true
+  register: woodpecker_server_env
+
+# -- Agent env file --
+- name: Deploy Woodpecker agent env file
+  ansible.builtin.template:
+    src: woodpecker-agent.env.j2
+    dest: "{{ woodpecker_config_dir }}/woodpecker-agent.env"
+    mode: "0600"
+  no_log: true
+  register: woodpecker_agent_env
+
+# -- Server quadlet --
+- name: Deploy Woodpecker server quadlet container file
+  ansible.builtin.template:
+    src: woodpecker-server.container.j2
+    dest: /etc/containers/systemd/woodpecker-server.container
+    mode: "0644"
+  register: woodpecker_server_quadlet
+
+# -- Agent quadlet --
+- name: Deploy Woodpecker agent quadlet container file
+  ansible.builtin.template:
+    src: woodpecker-agent.container.j2
+    dest: /etc/containers/systemd/woodpecker-agent.container
+    mode: "0644"
+  register: woodpecker_agent_quadlet
+
+# -- Reload and start --
+- name: Reload systemd daemon for quadlet
+  ansible.builtin.systemd:
+    daemon_reload: true
+  tags:
+    - molecule-notest
+
+- name: Enable and start Woodpecker server
+  ansible.builtin.systemd:
+    name: woodpecker-server
+    enabled: true
+    state: started
+  tags:
+    - molecule-notest
+
+- name: Enable and start Woodpecker agent
+  ansible.builtin.systemd:
+    name: woodpecker-agent
+    enabled: true
+    state: started
+  tags:
+    - molecule-notest
+
+- name: Restart Woodpecker server on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: woodpecker-server
+    state: restarted
+  when: woodpecker_server_env is changed or woodpecker_server_quadlet is changed
+  tags:
+    - molecule-notest
+
+- name: Restart Woodpecker agent on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: woodpecker-agent
+    state: restarted
+  when: woodpecker_agent_env is changed or woodpecker_agent_quadlet is changed
+  tags:
+    - molecule-notest

@@ -1,0 +1,26 @@
+---
+name: Lint
+
+"on":  # yamllint disable-line rule:truthy
+  push:
+    branches: ["*"]
+  pull_request:
+
+jobs:
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install --break-system-packages yamllint
+      - run: yamllint -c .yamllint ansible/
+
+  ansible-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install --break-system-packages ansible-core ansible-lint
+      - run: ansible-galaxy collection install -r ansible/requirements.yml -p ansible/collections
+      - run: ansible-lint --profile production ansible/
+        env:
+          ANSIBLE_CONFIG: ansible/ansible.cfg
+          ANSIBLE_ROLES_PATH: ansible/roles

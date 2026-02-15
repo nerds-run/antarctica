@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Auto-fix linting issues where possible"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT"
+ansible-lint --fix ansible/

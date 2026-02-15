@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+
+unqualified-search-registries = [{% for reg in container_runtime_unqualified_registries %}'{{ reg }}'{% if not loop.last %}, {% endif %}{% endfor %}]
+
+# Local registries (Caddy self-signed TLS)
+[[registry]]
+location = "forgejo.dev.nerds.run"
+insecure = true

@@ -1,0 +1,19 @@
+---
+galaxy_info:
+  role_name: woodpecker
+  author: nerdsrun
+  description: "Woodpecker CI server and agent as Podman Quadlet containers"
+  license: BSD-3-Clause
+  min_ansible_version: "2.17"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+  galaxy_tags:
+    - woodpecker
+    - ci
+    - podman
+    - quadlet
+dependencies:
+  - role: container_runtime
+  - role: postgresql

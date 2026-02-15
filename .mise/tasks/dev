@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#MISE description="Start development loop for a role"
+# Usage: mise run dev <role_name>
+set -euo pipefail
+
+ROLE="${1:?Usage: mise run dev <role_name>}"
+echo "==> Converging role: $ROLE"
+cd "$MISE_PROJECT_ROOT/ansible/roles/$ROLE"
+molecule converge
+echo ""
+echo "Instance is running. Iterate with:"
+echo "  mise run test:converge $ROLE   # re-apply role"
+echo "  mise run test:verify $ROLE     # check state"
+echo "  mise run test:login $ROLE      # SSH in"
+echo "  mise run test:destroy $ROLE    # tear down"

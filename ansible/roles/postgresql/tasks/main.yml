@@ -1,0 +1,56 @@
+---
+- name: Create PostgreSQL data directory
+  ansible.builtin.file:
+    path: "{{ postgresql_data_dir }}"
+    state: directory
+    mode: "0700"
+
+# -- Fetch secret from 1Password --
+- name: Retrieve PostgreSQL password from 1Password
+  ansible.builtin.command:
+    cmd: "op read '{{ postgresql_op_password }}'"
+  register: postgresql_password_result
+  changed_when: false
+  no_log: true
+  delegate_to: localhost
+  become: false
+  tags:
+    - molecule-notest
+
+- name: Set PostgreSQL password fact
+  ansible.builtin.set_fact:
+    postgresql_password: "{{ postgresql_password_result.stdout }}"
+  no_log: true
+  tags:
+    - molecule-notest
+
+# -- Quadlet container file --
+- name: Deploy PostgreSQL quadlet container file
+  ansible.builtin.template:
+    src: postgresql.container.j2
+    dest: /etc/containers/systemd/postgresql.container
+    mode: "0644"
+  register: postgresql_quadlet
+
+# -- Reload and start --
+- name: Reload systemd daemon for quadlet
+  ansible.builtin.systemd:
+    daemon_reload: true
+  tags:
+    - molecule-notest
+
+- name: Enable and start PostgreSQL container
+  ansible.builtin.systemd:
+    name: postgresql
+    enabled: true
+    state: started
+  tags:
+    - molecule-notest
+
+- name: Restart PostgreSQL on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: postgresql
+    state: restarted
+  when: postgresql_quadlet is changed
+  tags:
+    - molecule-notest

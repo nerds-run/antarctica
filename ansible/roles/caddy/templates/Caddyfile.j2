@@ -1,0 +1,43 @@
+# {{ ansible_managed }}
+
+(security_headers) {
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options SAMEORIGIN
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+}
+
+{{ caddy_forgejo_domain }} {
+    tls internal
+    import security_headers
+    request_body {
+        max_size 2GB
+    }
+    reverse_proxy localhost:{{ caddy_forgejo_http_port }}
+}
+
+{{ caddy_woodpecker_domain }} {
+    tls internal
+    import security_headers
+    reverse_proxy localhost:{{ caddy_woodpecker_http_port }}
+}
+
+{{ caddy_vscode_domain }} {
+    tls internal
+    import security_headers
+    reverse_proxy localhost:{{ caddy_vscode_http_port }} {
+        flush_interval -1
+    }
+}
+
+{{ caddy_cockpit_domain }} {
+    tls internal
+    import security_headers
+    reverse_proxy localhost:{{ caddy_cockpit_http_port }} {
+        transport http {
+            tls_insecure_skip_verify
+        }
+    }
+}

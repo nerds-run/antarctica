@@ -1,0 +1,39 @@
+---
+- name: Prepare
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install base prerequisites
+      ansible.builtin.apt:
+        name:
+          - python3
+          - sudo
+          - systemd
+          - gpg
+          - locales
+        state: present
+
+    - name: Create mock op CLI for testing
+      ansible.builtin.copy:
+        dest: /usr/local/bin/op
+        mode: "0755"
+        content: |
+          #!/bin/bash
+          # Mock 1Password CLI for Molecule testing
+          case "$2" in
+            "op://Infrastructure/antiarctica_postgresql/password") echo "test-db-password-12345" ;;
+            "op://Infrastructure/antiarctica_woodpecker/agent-secret") echo "test-agent-secret-67890" ;;
+            "op://Infrastructure/antiarctica_woodpecker/gitea-client") echo "test-gitea-client-abcde" ;;
+            "op://Infrastructure/antiarctica_woodpecker/gitea-secret") echo "test-gitea-secret-fghij" ;;
+            "op://Infrastructure/antiarctica_forgejo/secret-key") echo "test-forgejo-secret-key" ;;
+            "op://Infrastructure/antiarctica_forgejo/internal-token") echo "test-forgejo-internal-token" ;;
+            "op://Infrastructure/antiarctica_forgejo/oauth2-jwt-secret") echo "test-forgejo-oauth2-jwt" ;;
+            "op://Infrastructure/antiarctica_forgejo/lfs-jwt-secret") echo "test-forgejo-lfs-jwt" ;;
+            "op://Infrastructure/antiarctica_forgejo/action-runner-token") echo "test-runner-token-klmno" ;;
+            *) echo "mock-secret-for-$2" ;;
+          esac

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Deploy only OpenVSCode Server changes"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT/ansible"
+ansible-playbook playbooks/openvscode.yml -i inventory/

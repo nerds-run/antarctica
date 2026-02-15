@@ -1,0 +1,69 @@
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: ${MOLECULE_PROJECT_DIRECTORY}/../../requirements.yml
+
+driver:
+  name: podman
+
+platforms:
+  - name: "molecule-forgejo-debian12"
+    image: "docker.io/geerlingguy/docker-debian12-ansible:latest"
+    pre_build_image: true
+    privileged: true
+    command: /usr/sbin/init
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    tmpfs:
+      /run: rw
+      /tmp: rw
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
+  options:
+    skip-tags: molecule-notest
+  config_options:
+    defaults:
+      callbacks_enabled: timer, profile_tasks
+      stdout_callback: ansible.builtin.default
+      callback_result_format: yaml
+    diff:
+      always: true
+  playbooks:
+    prepare: prepare.yml
+    converge: converge.yml
+    verify: verify.yml
+  inventory:
+    group_vars:
+      all:
+        ansible_python_interpreter: /usr/bin/python3
+        postgresql_password: "test-db-password-12345"
+        forgejo_db_password: "test-db-password-12345"
+        forgejo_secret_key: "test-forgejo-secret-key"
+        forgejo_internal_token: "test-forgejo-internal-token"
+        forgejo_oauth2_jwt_secret: "test-forgejo-oauth2-jwt"
+        forgejo_lfs_jwt_secret: "test-forgejo-lfs-jwt"
+        forgejo_action_runner_token: "test-runner-token-klmno"
+
+verifier:
+  name: ansible
+
+scenario:
+  name: default
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy

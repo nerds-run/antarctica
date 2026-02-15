@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="First-time deployment from scratch"
+#MISE depends=["deploy:ssh-key", "deploy:infra", "deploy:configure", "deploy:validate"]
+set -euo pipefail
+
+echo "Bootstrap complete — infrastructure provisioned, configured, and validated."

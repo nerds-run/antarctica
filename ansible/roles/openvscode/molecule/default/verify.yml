@@ -1,0 +1,15 @@
+---
+- name: Verify openvscode role
+  hosts: all
+  become: true
+  tasks:
+    - name: Check openvscode-server quadlet file exists
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/openvscode-server.container
+      register: openvscode_quadlet
+
+    - name: Assert openvscode-server quadlet exists
+      ansible.builtin.assert:
+        that:
+          - openvscode_quadlet.stat.exists
+        fail_msg: "OpenVSCode Server quadlet file does not exist"

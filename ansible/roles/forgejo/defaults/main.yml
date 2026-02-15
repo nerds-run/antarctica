@@ -1,0 +1,49 @@
+---
+forgejo_image: codeberg.org/forgejo/forgejo:latest
+forgejo_domain: forgejo.dev.nerds.run
+forgejo_http_port: 3000
+forgejo_ssh_port: 2222
+forgejo_data_dir: /data/forgejo
+forgejo_config_dir: /etc/forgejo
+forgejo_container_name: forgejo
+
+forgejo_lfs_enabled: true
+forgejo_default_actions_url: "https://github.com"
+forgejo_webhook_allowed_hosts: "external,loopback,private,woodpecker.dev.nerds.run"
+
+# Forgejo PostgreSQL (dedicated container)
+forgejo_db_image: docker.io/library/postgres:16-bookworm
+forgejo_db_container_name: forgejo-postgresql
+forgejo_db_port: 5433
+forgejo_db_name: forgejo
+forgejo_db_user: forgejo
+forgejo_db_data_dir: /data/forgejo-postgresql
+
+# Admin user (for API token generation)
+forgejo_admin_user: abanna
+
+# OAuth2 applications to create for third-party services
+forgejo_oauth2_apps:
+  - name: "Woodpecker CI"
+    redirect_uris:
+      - "https://woodpecker.dev.nerds.run/authorize"
+    op_vault: Infrastructure
+    op_item: antiarctica_woodpecker
+    op_client_field: gitea-client
+    op_secret_field: gitea-secret
+
+# Gitea Actions Runner
+forgejo_actions_runner_image: gitea/act_runner:latest
+forgejo_actions_runner_container_name: actions-runner
+forgejo_actions_runner_name: antarctica
+forgejo_actions_runner_capacity: 5
+forgejo_actions_runner_timeout: 45m
+forgejo_actions_runner_config_dir: /etc/forgejo
+
+# 1Password references
+forgejo_op_db_password: "op://Infrastructure/antiarctica_forgejo/db-password"
+forgejo_op_secret_key: "op://Infrastructure/antiarctica_forgejo/secret-key"
+forgejo_op_internal_token: "op://Infrastructure/antiarctica_forgejo/internal-token"
+forgejo_op_oauth2_jwt_secret: "op://Infrastructure/antiarctica_forgejo/oauth2-jwt-secret"
+forgejo_op_lfs_jwt_secret: "op://Infrastructure/antiarctica_forgejo/lfs-jwt-secret"
+forgejo_op_action_runner_token: "op://Infrastructure/antiarctica_forgejo/action-runner-token"

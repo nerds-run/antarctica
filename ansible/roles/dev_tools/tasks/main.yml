@@ -1,0 +1,542 @@
+---
+# ============================================================
+# APT packages
+# ============================================================
+- name: Install apt dev tool packages
+  ansible.builtin.apt:
+    name: "{{ dev_tools_apt_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+# ============================================================
+# pip packages
+# ============================================================
+- name: Install pip dev tool packages
+  ansible.builtin.pip:
+    name: "{{ dev_tools_pip_packages }}"
+    state: present
+    extra_args: --break-system-packages
+
+# ============================================================
+# npm packages
+# ============================================================
+- name: Install npm dev tool packages
+  community.general.npm:
+    name: "{{ item }}"
+    global: true
+    state: present
+  loop: "{{ dev_tools_npm_packages }}"
+
+# ============================================================
+# Zsh
+# ============================================================
+- name: Install zsh
+  ansible.builtin.apt:
+    name: zsh
+    state: present
+
+# ============================================================
+# Helix editor (GitHub release)
+# ============================================================
+- name: Check if helix is installed at target version
+  ansible.builtin.command:
+    cmd: /usr/local/bin/hx --version
+  register: dev_tools_hx_version_check
+  changed_when: false
+  failed_when: false
+
+- name: Download and install helix
+  when: dev_tools_hx_version_check.rc != 0 or dev_tools_helix_version not in (dev_tools_hx_version_check.stdout | default(''))
+  block:
+    - name: Download helix tarball
+      ansible.builtin.get_url:
+        url: "https://github.com/helix-editor/helix/releases/download/{{ dev_tools_helix_version }}/helix-{{ dev_tools_helix_version }}-x86_64-linux.tar.xz"
+        dest: /tmp/helix.tar.xz
+        mode: "0644"
+
+    - name: Extract helix
+      ansible.builtin.unarchive:
+        src: /tmp/helix.tar.xz
+        dest: /tmp/
+        remote_src: true
+
+    - name: Install helix binary
+      ansible.builtin.copy:
+        src: "/tmp/helix-{{ dev_tools_helix_version }}-x86_64-linux/hx"
+        dest: /usr/local/bin/hx
+        mode: "0755"
+        remote_src: true
+
+    - name: Install helix runtime
+      ansible.builtin.command:
+        cmd: "cp -r /tmp/helix-{{ dev_tools_helix_version }}-x86_64-linux/runtime /usr/local/lib/helix-runtime"
+      args:
+        creates: /usr/local/lib/helix-runtime
+
+    - name: Clean up helix download
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/helix.tar.xz
+        - "/tmp/helix-{{ dev_tools_helix_version }}-x86_64-linux"
+
+# ============================================================
+# Helix config (skeleton and per-user)
+# ============================================================
+- name: Create helix skel config directory
+  ansible.builtin.file:
+    path: /etc/skel/.config/helix
+    state: directory
+    mode: "0755"
+
+- name: Deploy helix config to skel
+  ansible.builtin.template:
+    src: helix-config.toml.j2
+    dest: /etc/skel/.config/helix/config.toml
+    mode: "0644"
+
+- name: Create helix config directory for each user
+  ansible.builtin.file:
+    path: "/home/{{ item }}/.config/helix"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: "0755"
+  loop: "{{ dev_tools_users }}"
+  tags:
+    - molecule-notest
+
+- name: Deploy helix config per user
+  ansible.builtin.template:
+    src: helix-config.toml.j2
+    dest: "/home/{{ item }}/.config/helix/config.toml"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: "0644"
+  loop: "{{ dev_tools_users }}"
+  tags:
+    - molecule-notest
+
+# ============================================================
+# GitHub CLI
+# ============================================================
+- name: Check if gh CLI is installed at target version
+  ansible.builtin.command:
+    cmd: /usr/local/bin/gh version
+  register: dev_tools_gh_version_check
+  changed_when: false
+  failed_when: false
+
+- name: Download and install gh CLI
+  when: dev_tools_gh_version_check.rc != 0 or dev_tools_gh_version not in (dev_tools_gh_version_check.stdout | default(''))
+  block:
+    - name: Download gh CLI tarball
+      ansible.builtin.get_url:
+        url: "https://github.com/cli/cli/releases/download/v{{ dev_tools_gh_version }}/gh_{{ dev_tools_gh_version }}_linux_amd64.tar.gz"
+        dest: /tmp/gh.tar.gz
+        mode: "0644"
+
+    - name: Extract gh CLI
+      ansible.builtin.unarchive:
+        src: /tmp/gh.tar.gz
+        dest: /tmp/
+        remote_src: true
+
+    - name: Install gh binary
+      ansible.builtin.copy:
+        src: "/tmp/gh_{{ dev_tools_gh_version }}_linux_amd64/bin/gh"
+        dest: /usr/local/bin/gh
+        mode: "0755"
+        remote_src: true
+
+    - name: Clean up gh download
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/gh.tar.gz
+        - "/tmp/gh_{{ dev_tools_gh_version }}_linux_amd64"
+
+# ============================================================
+# glab (GitLab CLI)
+# ============================================================
+- name: Check if glab is installed at target version
+  ansible.builtin.command:
+    cmd: /usr/local/bin/glab --version
+  register: dev_tools_glab_version_check
+  changed_when: false
+  failed_when: false
+
+- name: Download and install glab
+  when: dev_tools_glab_version_check.rc != 0 or dev_tools_glab_version not in (dev_tools_glab_version_check.stdout | default(''))
+  block:
+    - name: Download glab tarball
+      ansible.builtin.get_url:
+        url: "https://gitlab.com/gitlab-org/cli/-/releases/v{{ dev_tools_glab_version }}/downloads/glab_{{ dev_tools_glab_version }}_linux_amd64.tar.gz"
+        dest: /tmp/glab.tar.gz
+        mode: "0644"
+
+    - name: Extract glab
+      ansible.builtin.unarchive:
+        src: /tmp/glab.tar.gz
+        dest: /tmp/
+        remote_src: true
+
+    - name: Install glab binary
+      ansible.builtin.copy:
+        src: /tmp/bin/glab
+        dest: /usr/local/bin/glab
+        mode: "0755"
+        remote_src: true
+
+    - name: Clean up glab download
+      ansible.builtin.file:
+        path: /tmp/glab.tar.gz
+        state: absent
+
+# ============================================================
+# yq
+# ============================================================
+- name: Install yq
+  ansible.builtin.get_url:
+    url: "https://github.com/mikefarah/yq/releases/download/v{{ dev_tools_yq_version }}/yq_linux_amd64"
+    dest: /usr/local/bin/yq
+    mode: "0755"
+
+# ============================================================
+# scc
+# ============================================================
+- name: Download scc
+  ansible.builtin.get_url:
+    url: "https://github.com/boyter/scc/releases/download/v{{ dev_tools_scc_version }}/scc_Linux_x86_64.tar.gz"
+    dest: /tmp/scc.tar.gz
+    mode: "0644"
+  changed_when: false
+
+- name: Extract and install scc
+  ansible.builtin.unarchive:
+    src: /tmp/scc.tar.gz
+    dest: /usr/local/bin/
+    remote_src: true
+    include:
+      - scc
+    mode: "0755"
+
+# ============================================================
+# just
+# ============================================================
+- name: Download and install just
+  ansible.builtin.get_url:
+    url: "https://github.com/casey/just/releases/download/{{ dev_tools_just_version }}/just-{{ dev_tools_just_version }}-x86_64-unknown-linux-musl.tar.gz"
+    dest: /tmp/just.tar.gz
+    mode: "0644"
+  changed_when: false
+
+- name: Extract and install just
+  ansible.builtin.unarchive:
+    src: /tmp/just.tar.gz
+    dest: /usr/local/bin/
+    remote_src: true
+    include:
+      - just
+    mode: "0755"
+
+# ============================================================
+# go-task
+# ============================================================
+- name: Download go-task
+  ansible.builtin.get_url:
+    url: "https://github.com/go-task/task/releases/download/v{{ dev_tools_go_task_version }}/task_linux_amd64.tar.gz"
+    dest: /tmp/go-task.tar.gz
+    mode: "0644"
+  changed_when: false
+
+- name: Extract and install go-task
+  ansible.builtin.unarchive:
+    src: /tmp/go-task.tar.gz
+    dest: /usr/local/bin/
+    remote_src: true
+    include:
+      - task
+    mode: "0755"
+
+# ============================================================
+# kind
+# ============================================================
+- name: Install kind
+  ansible.builtin.get_url:
+    url: "https://github.com/kubernetes-sigs/kind/releases/download/v{{ dev_tools_kind_version }}/kind-linux-amd64"
+    dest: /usr/local/bin/kind
+    mode: "0755"
+
+# ============================================================
+# talosctl
+# ============================================================
+- name: Install talosctl
+  ansible.builtin.get_url:
+    url: "https://github.com/siderolabs/talos/releases/download/v{{ dev_tools_talosctl_version }}/talosctl-linux-amd64"
+    dest: /usr/local/bin/talosctl
+    mode: "0755"
+
+# ============================================================
+# cosign
+# ============================================================
+- name: Install cosign
+  ansible.builtin.get_url:
+    url: "https://github.com/sigstore/cosign/releases/download/v{{ dev_tools_cosign_version }}/cosign-linux-amd64"
+    dest: /usr/local/bin/cosign
+    mode: "0755"
+
+# ============================================================
+# dive
+# ============================================================
+- name: Download dive
+  ansible.builtin.get_url:
+    url: "https://github.com/wagoodman/dive/releases/download/v{{ dev_tools_dive_version }}/dive_{{ dev_tools_dive_version }}_linux_amd64.tar.gz"
+    dest: /tmp/dive.tar.gz
+    mode: "0644"
+  changed_when: false
+
+- name: Extract and install dive
+  ansible.builtin.unarchive:
+    src: /tmp/dive.tar.gz
+    dest: /usr/local/bin/
+    remote_src: true
+    include:
+      - dive
+    mode: "0755"
+
+# ============================================================
+# act (GitHub Actions local runner)
+# ============================================================
+- name: Download act
+  ansible.builtin.get_url:
+    url: "https://github.com/nektos/act/releases/download/v{{ dev_tools_act_version }}/act_Linux_x86_64.tar.gz"
+    dest: /tmp/act.tar.gz
+    mode: "0644"
+  changed_when: false
+
+- name: Extract and install act
+  ansible.builtin.unarchive:
+    src: /tmp/act.tar.gz
+    dest: /usr/local/bin/
+    remote_src: true
+    include:
+      - act
+    mode: "0755"
+
+# ============================================================
+# marksman (Markdown LSP)
+# ============================================================
+- name: Install marksman
+  ansible.builtin.get_url:
+    url: "https://github.com/artempyanykh/marksman/releases/download/{{ dev_tools_marksman_version }}/marksman-linux-x64"
+    dest: /usr/local/bin/marksman
+    mode: "0755"
+
+# ============================================================
+# gdu (disk usage analyzer)
+# ============================================================
+- name: Download gdu
+  ansible.builtin.get_url:
+    url: "https://github.com/dundee/gdu/releases/download/v{{ dev_tools_gdu_version }}/gdu_linux_amd64.tgz"
+    dest: /tmp/gdu.tgz
+    mode: "0644"
+  changed_when: false
+
+- name: Extract and install gdu
+  ansible.builtin.unarchive:
+    src: /tmp/gdu.tgz
+    dest: /usr/local/bin/
+    remote_src: true
+    include:
+      - gdu_linux_amd64
+    mode: "0755"
+
+- name: Symlink gdu
+  ansible.builtin.file:
+    src: /usr/local/bin/gdu_linux_amd64
+    dest: /usr/local/bin/gdu
+    state: link
+
+# ============================================================
+# distrobox
+# ============================================================
+- name: Check if distrobox is installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/distrobox
+  register: dev_tools_distrobox_check
+
+- name: Download and install distrobox
+  when: not dev_tools_distrobox_check.stat.exists
+  block:
+    - name: Download distrobox install script
+      ansible.builtin.get_url:
+        url: "https://raw.githubusercontent.com/89luca89/distrobox/{{ dev_tools_distrobox_version }}/install"
+        dest: /tmp/distrobox-install.sh
+        mode: "0755"
+
+    - name: Install distrobox
+      ansible.builtin.command:
+        cmd: /tmp/distrobox-install.sh --prefix /usr/local
+        creates: /usr/local/bin/distrobox
+
+    - name: Clean up distrobox install script
+      ansible.builtin.file:
+        path: /tmp/distrobox-install.sh
+        state: absent
+
+# ============================================================
+# atuin (shell history)
+# ============================================================
+- name: Check if atuin is installed at target version
+  ansible.builtin.command:
+    cmd: /usr/local/bin/atuin --version
+  register: dev_tools_atuin_version_check
+  changed_when: false
+  failed_when: false
+
+- name: Download and install atuin
+  when: dev_tools_atuin_version_check.rc != 0 or dev_tools_atuin_version not in (dev_tools_atuin_version_check.stdout | default(''))
+  block:
+    - name: Download atuin tarball
+      ansible.builtin.get_url:
+        url: "https://github.com/atuinsh/atuin/releases/download/v{{ dev_tools_atuin_version }}/atuin-x86_64-unknown-linux-gnu.tar.gz"
+        dest: /tmp/atuin.tar.gz
+        mode: "0644"
+
+    - name: Extract atuin
+      ansible.builtin.unarchive:
+        src: /tmp/atuin.tar.gz
+        dest: /tmp/
+        remote_src: true
+
+    - name: Install atuin binary
+      ansible.builtin.command:
+        cmd: find /tmp -name atuin -type f -executable -exec cp {} /usr/local/bin/atuin \;
+      changed_when: true
+
+    - name: Set atuin permissions
+      ansible.builtin.file:
+        path: /usr/local/bin/atuin
+        mode: "0755"
+
+    - name: Clean up atuin download
+      ansible.builtin.file:
+        path: /tmp/atuin.tar.gz
+        state: absent
+
+# ============================================================
+# zellij (terminal multiplexer)
+# ============================================================
+- name: Check if zellij is installed at target version
+  ansible.builtin.command:
+    cmd: /usr/local/bin/zellij --version
+  register: dev_tools_zellij_version_check
+  changed_when: false
+  failed_when: false
+
+- name: Download and install zellij
+  when: dev_tools_zellij_version_check.rc != 0 or dev_tools_zellij_version not in (dev_tools_zellij_version_check.stdout | default(''))
+  block:
+    - name: Download zellij tarball
+      ansible.builtin.get_url:
+        url: "https://github.com/zellij-org/zellij/releases/download/v{{ dev_tools_zellij_version }}/zellij-x86_64-unknown-linux-musl.tar.gz"
+        dest: /tmp/zellij.tar.gz
+        mode: "0644"
+
+    - name: Extract and install zellij
+      ansible.builtin.unarchive:
+        src: /tmp/zellij.tar.gz
+        dest: /usr/local/bin/
+        remote_src: true
+        mode: "0755"
+
+    - name: Clean up zellij download
+      ansible.builtin.file:
+        path: /tmp/zellij.tar.gz
+        state: absent
+
+# ============================================================
+# rust-analyzer
+# ============================================================
+- name: Install rust-analyzer
+  ansible.builtin.get_url:
+    url: "https://github.com/rust-lang/rust-analyzer/releases/latest/download/rust-analyzer-x86_64-unknown-linux-gnu.gz"
+    dest: /tmp/rust-analyzer.gz
+    mode: "0644"
+  changed_when: false
+
+- name: Decompress rust-analyzer
+  ansible.builtin.command:
+    cmd: gunzip -f /tmp/rust-analyzer.gz
+  args:
+    creates: /tmp/rust-analyzer
+
+- name: Install rust-analyzer binary
+  ansible.builtin.copy:
+    src: /tmp/rust-analyzer
+    dest: /usr/local/bin/rust-analyzer
+    mode: "0755"
+    remote_src: true
+
+# ============================================================
+# Tmux Plugin Manager (TPM)
+# ============================================================
+- name: Create TPM directory in skel
+  ansible.builtin.file:
+    path: /etc/skel/.tmux/plugins/tpm
+    state: directory
+    mode: "0755"
+
+- name: Clone TPM to skel
+  ansible.builtin.git:
+    repo: https://github.com/tmux-plugins/tpm.git
+    dest: /etc/skel/.tmux/plugins/tpm
+    depth: 1
+    version: master
+
+- name: Create TPM directory for each user
+  ansible.builtin.file:
+    path: "/home/{{ item }}/.tmux/plugins/tpm"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: "0755"
+  loop: "{{ dev_tools_users }}"
+  tags:
+    - molecule-notest
+
+- name: Clone TPM for each user
+  ansible.builtin.git:
+    repo: https://github.com/tmux-plugins/tpm.git
+    dest: "/home/{{ item }}/.tmux/plugins/tpm"
+    depth: 1
+    version: master
+  become: true
+  become_user: "{{ item }}"
+  loop: "{{ dev_tools_users }}"
+  tags:
+    - molecule-notest
+
+# ============================================================
+# Environment variables via /etc/profile.d/
+# ============================================================
+- name: Deploy dev tools profile script
+  ansible.builtin.template:
+    src: profile.d-devtools.sh.j2
+    dest: /etc/profile.d/devtools.sh
+    mode: "0644"
+
+# ============================================================
+# Set zsh as login shell for dev users
+# ============================================================
+- name: Set zsh as login shell for dev users
+  ansible.builtin.user:
+    name: "{{ item }}"
+    shell: /usr/bin/zsh
+  loop: "{{ dev_tools_users }}"
+  tags:
+    - molecule-notest

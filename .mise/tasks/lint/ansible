@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Run ansible-lint"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT"
+ansible-lint --profile production ansible/

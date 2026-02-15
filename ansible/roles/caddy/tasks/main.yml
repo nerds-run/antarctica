@@ -1,0 +1,78 @@
+---
+# -- Add Caddy apt repository --
+- name: Install prerequisites for Caddy repo
+  ansible.builtin.apt:
+    name:
+      - debian-keyring
+      - debian-archive-keyring
+      - apt-transport-https
+      - curl
+    state: present
+
+- name: Add Caddy GPG key
+  ansible.builtin.get_url:
+    url: https://dl.cloudsmith.io/public/caddy/stable/gpg.key
+    dest: /etc/apt/keyrings/caddy-stable.asc
+    mode: "0644"
+
+- name: Add Caddy apt repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/caddy-stable.asc] https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
+    filename: caddy-stable
+    state: present
+
+- name: Install Caddy
+  ansible.builtin.apt:
+    name: caddy
+    state: present
+    update_cache: true
+
+# -- Data directory --
+- name: Create Caddy data directory
+  ansible.builtin.file:
+    path: "{{ caddy_data_dir }}"
+    state: directory
+    owner: caddy
+    group: caddy
+    mode: "0750"
+
+# -- Caddy environment override for data dir --
+- name: Create Caddy systemd override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/caddy.service.d
+    state: directory
+    mode: "0755"
+
+- name: Set Caddy data directory via systemd override
+  ansible.builtin.copy:
+    content: |
+      [Service]
+      Environment=XDG_DATA_HOME={{ caddy_data_dir }}
+    dest: /etc/systemd/system/caddy.service.d/override.conf
+    mode: "0644"
+  notify:
+    - Daemon reload
+    - Restart caddy
+
+# -- Caddyfile --
+- name: Deploy Caddyfile
+  ansible.builtin.template:
+    src: Caddyfile.j2
+    dest: "{{ caddy_config_dir }}/Caddyfile"
+    owner: caddy
+    group: caddy
+    mode: "0644"
+  register: caddy_config
+
+# -- Enable and start --
+- name: Enable and start Caddy
+  ansible.builtin.systemd:
+    name: caddy
+    enabled: true
+    state: started
+
+- name: Reload Caddy on config change # noqa: no-handler
+  ansible.builtin.systemd:
+    name: caddy
+    state: reloaded
+  when: caddy_config is changed

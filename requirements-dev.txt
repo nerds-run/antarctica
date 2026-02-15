@@ -1,0 +1,8 @@
+ansible-core>=2.17,<2.18
+ansible-lint>=25.0
+molecule>=25.0
+molecule-plugins[podman]>=23.5
+yamllint>=1.35
+jmespath>=1.0
+pre-commit>=4.0
+pytest-testinfra>=10.0

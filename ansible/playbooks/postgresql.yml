@@ -1,0 +1,10 @@
+---
+- name: Antarctica PostgreSQL deployment
+  hosts: antarctica
+  become: true
+
+  roles:
+    - role: container_runtime
+      tags: [container_runtime]
+    - role: postgresql
+      tags: [postgresql]

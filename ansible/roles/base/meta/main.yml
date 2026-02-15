@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  role_name: base
+  author: nerdsrun
+  description: "OS hardening, users, SSH, firewall, system packages for Debian 12"
+  license: BSD-3-Clause
+  min_ansible_version: "2.17"
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+  galaxy_tags:
+    - debian
+    - hardening
+    - ssh
+    - firewall
+    - system
+dependencies: []

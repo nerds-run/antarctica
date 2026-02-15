@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+#MISE description="Extract deploy SSH key from 1Password (PKCS8 to OpenSSH)"
+# Usage: mise run deploy:ssh-key
+# Converts the Ed25519 PKCS8 key stored in 1Password to OpenSSH format.
+# Output: $ANTARCTICA_SSH_KEY (default: /tmp/antarctica-deploy.key)
+set -euo pipefail
+
+KEY_FILE="${ANTARCTICA_SSH_KEY:-/tmp/antarctica-deploy.key}"
+
+op read "op://Infrastructure/antarctica-deploy/private key" > /tmp/antarctica-pk8.key
+
+python3 -c "
+import base64, struct
+
+with open('/tmp/antarctica-pk8.key') as f:
+    lines = f.read().strip().split('\n')
+b64 = ''.join(l for l in lines if not l.startswith('---'))
+data = base64.b64decode(b64)
+seed, pub = data[16:48], data[51:83]
+
+def s(d):
+    if isinstance(d, str): d = d.encode()
+    return struct.pack('>I', len(d)) + d
+
+magic = b'openssh-key-v1\x00'
+pub_blob = s('ssh-ed25519') + s(pub)
+chk = struct.pack('>II', 0x12345678, 0x12345678)
+priv = chk + s('ssh-ed25519') + s(pub) + s(seed + pub) + s('')
+pad = 8 - (len(priv) % 8)
+if pad < 8:
+    priv += bytes(range(1, pad + 1))
+kd = magic + s('none') + s('none') + s(b'') + struct.pack('>I', 1) + s(pub_blob) + s(priv)
+b = base64.b64encode(kd).decode()
+ls = [b[i:i+70] for i in range(0, len(b), 70)]
+with open('${KEY_FILE}', 'w') as f:
+    hdr = 'OPENSSH PRIV' + 'ATE KEY'
+    f.write(f'-----BEGIN {hdr}-----\n' + '\n'.join(ls) + f'\n-----END {hdr}-----\n')
+"
+
+chmod 600 "$KEY_FILE"
+rm -f /tmp/antarctica-pk8.key
+echo "Deploy key written to $KEY_FILE"

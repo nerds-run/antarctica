@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Full deployment: Pulumi infra + Ansible config"
+#MISE depends=["deploy:infra", "deploy:configure"]
+set -euo pipefail

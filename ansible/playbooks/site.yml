@@ -1,0 +1,23 @@
+---
+# Full site playbook -- converges entire Antarctica server
+- name: Antarctica full deployment
+  hosts: antarctica
+  become: true
+
+  roles:
+    - role: base
+      tags: [base]
+    - role: container_runtime
+      tags: [container_runtime, containers]
+    - role: caddy
+      tags: [caddy, reverse_proxy]
+    - role: postgresql
+      tags: [postgresql, database]
+    - role: forgejo
+      tags: [forgejo, git]
+    - role: woodpecker
+      tags: [woodpecker, ci]
+    - role: openvscode
+      tags: [openvscode, vscode]
+    - role: dev_tools
+      tags: [dev_tools, tools]

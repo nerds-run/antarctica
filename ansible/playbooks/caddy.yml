@@ -1,0 +1,8 @@
+---
+- name: Antarctica Caddy reverse proxy deployment
+  hosts: antarctica
+  become: true
+
+  roles:
+    - role: caddy
+      tags: [caddy]

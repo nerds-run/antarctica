@@ -1,0 +1,46 @@
+---
+- name: Verify dev_tools role
+  hosts: all
+  become: true
+  tasks:
+    - name: Check git is installed
+      ansible.builtin.package:
+        name: git
+        state: present
+      check_mode: true
+      register: dev_tools_git_check
+      failed_when: dev_tools_git_check is changed
+
+    - name: Assert git is available
+      ansible.builtin.assert:
+        that:
+          - dev_tools_git_check is not changed
+        fail_msg: "Git is not installed"
+
+    - name: Check fzf is installed
+      ansible.builtin.command: fzf --version
+      register: dev_tools_fzf_version
+      changed_when: false
+      failed_when: false
+
+    - name: Check jq is installed
+      ansible.builtin.command: jq --version
+      register: dev_tools_jq_version
+      changed_when: false
+
+    - name: Assert jq is available
+      ansible.builtin.assert:
+        that:
+          - dev_tools_jq_version.rc == 0
+        fail_msg: "jq is not installed"
+
+    - name: Check profile.d script exists
+      ansible.builtin.stat:
+        path: /etc/profile.d/devtools.sh
+      register: dev_tools_profile_script
+
+    - name: Assert profile.d script exists
+      ansible.builtin.assert:
+        that:
+          - dev_tools_profile_script.stat.exists
+        fail_msg: "/etc/profile.d/devtools.sh does not exist"

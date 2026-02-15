@@ -1,0 +1,23 @@
+---
+base_server_hostname: antarctica
+base_timezone: America/Chicago
+base_locale: en_US.UTF-8
+
+base_firewall_allowed_tcp_ports:
+  - 22
+  - 80
+  - 443
+
+base_users: []
+base_root_ssh_keys: []
+base_deploy_user: deploy
+
+base_data_root: /data
+base_data_dirs: []
+
+base_zram_percent: 75
+
+base_sysctl_settings:
+  kernel.sysrq: 1
+
+base_motd_banner: "ANTARCTICA"

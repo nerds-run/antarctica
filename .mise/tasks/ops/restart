@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#MISE description="Restart a service (usage: mise run ops:restart <service>)"
+set -euo pipefail
+
+SERVICE="${1:?Usage: mise run ops:restart <service-name>}"
+KEY_FILE="${ANTARCTICA_SSH_KEY:-/tmp/antarctica-deploy.key}"
+HOST="${ANTARCTICA_HOST:-172.22.202.50}"
+
+if [ ! -f "$KEY_FILE" ]; then
+  mise run deploy:ssh-key
+fi
+
+echo "Restarting $SERVICE..."
+ssh -i "$KEY_FILE" -o StrictHostKeyChecking=accept-new "antarctica@$HOST" sudo systemctl restart "$SERVICE"
+echo "$SERVICE restarted."
+
+echo "Status:"
+ssh -i "$KEY_FILE" -o StrictHostKeyChecking=accept-new "antarctica@$HOST" sudo systemctl is-active "$SERVICE"

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Configure server with Ansible"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT/ansible"
+ansible-playbook playbooks/site.yml -i inventory/

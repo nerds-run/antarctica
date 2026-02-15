@@ -1,3 +1,34 @@
 result*
 *.raw
 *.qcow2
+
+# Pulumi
+infra/.pulumi/
+infra/antarctica-infra
+infra/infra
+
+# Claude Code
+.claude/
+
+# Ansible
+ansible/inventory/pulumi_output.json
+ansible/*.retry
+ansible/collections/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Molecule
+.cache/
+
+# Ansible facts cache
+/tmp/ansible_facts/
+
+# 1Password
+.op/
+
+# IDE
+.vscode/
+.idea/

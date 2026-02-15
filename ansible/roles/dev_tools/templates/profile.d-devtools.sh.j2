@@ -1,0 +1,23 @@
+#!/bin/sh
+# {{ ansible_managed }}
+# Dev tools environment variables
+
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+
+export GOPATH="${GOPATH:-$HOME/go}"
+export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+export DOTNET_CLI_HOME="${DOTNET_CLI_HOME:-$HOME/.dotnet}"
+export NUGET_PACKAGES="${NUGET_PACKAGES:-$XDG_CACHE_HOME/NuGetPackages}"
+export GNUPGHOME="${GNUPGHOME:-$HOME/.gnupg}"
+export HISTFILE="${HISTFILE:-$XDG_STATE_HOME/bash/history}"
+export TLDR_CACHE_DIR="${TLDR_CACHE_DIR:-$XDG_CACHE_HOME/tldr}"
+
+export HELIX_RUNTIME="/usr/local/lib/helix-runtime"
+export EDITOR="hx"
+export VISUAL="hx"
+
+# Ensure key bin directories are in PATH
+export PATH="$HOME/.cargo/bin:$HOME/go/bin:$HOME/.local/bin:/usr/local/cargo/bin:/usr/local/go/bin:$PATH"

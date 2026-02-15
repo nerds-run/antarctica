@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Deploy only Caddy changes"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT/ansible"
+ansible-playbook playbooks/caddy.yml -i inventory/

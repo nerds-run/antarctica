@@ -1,0 +1,14 @@
+---
+container_runtime_network_name: antarctica
+container_runtime_storage_driver: overlay
+
+container_runtime_unqualified_registries:
+  - docker.io
+  - quay.io
+  - ghcr.io
+
+container_runtime_data_dirs:
+  - /data/forgejo
+  - /data/woodpecker
+
+container_runtime_prune_schedule: "0 3 * * 0"

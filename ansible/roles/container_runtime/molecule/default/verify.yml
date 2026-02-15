@@ -1,0 +1,37 @@
+---
+- name: Verify container_runtime role
+  hosts: all
+  become: true
+  tasks:
+    - name: Check podman is installed
+      ansible.builtin.command: podman --version
+      register: container_runtime_podman_version
+      changed_when: false
+
+    - name: Assert podman is available
+      ansible.builtin.assert:
+        that:
+          - container_runtime_podman_version.rc == 0
+        fail_msg: "Podman is not installed"
+
+    - name: Check buildah is installed
+      ansible.builtin.command: buildah --version
+      register: container_runtime_buildah_version
+      changed_when: false
+
+    - name: Assert buildah is available
+      ansible.builtin.assert:
+        that:
+          - container_runtime_buildah_version.rc == 0
+        fail_msg: "Buildah is not installed"
+
+    - name: Check registries.conf exists
+      ansible.builtin.stat:
+        path: /etc/containers/registries.conf
+      register: container_runtime_registries_conf
+
+    - name: Assert registries.conf exists
+      ansible.builtin.assert:
+        that:
+          - container_runtime_registries_conf.stat.exists
+        fail_msg: "registries.conf does not exist"

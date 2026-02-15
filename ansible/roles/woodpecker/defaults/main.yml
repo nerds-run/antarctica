@@ -1,0 +1,32 @@
+---
+woodpecker_server_image: docker.io/woodpeckerci/woodpecker-server:latest
+woodpecker_agent_image: docker.io/woodpeckerci/woodpecker-agent:latest
+
+woodpecker_domain: woodpecker.dev.nerds.run
+woodpecker_forgejo_domain: forgejo.dev.nerds.run
+
+woodpecker_http_port: 3040
+woodpecker_grpc_port: 3041
+woodpecker_data_dir: /data/woodpecker
+woodpecker_config_dir: /etc/woodpecker
+
+woodpecker_server_container_name: woodpecker-server
+woodpecker_agent_container_name: woodpecker-agent
+
+woodpecker_open: true
+woodpecker_admins: "abanna"
+woodpecker_db_driver: postgres
+woodpecker_log_level: debug
+woodpecker_max_workflows: 10
+
+# PostgreSQL connection
+woodpecker_postgresql_container_name: postgresql
+woodpecker_postgresql_db: woodpecker
+woodpecker_postgresql_user: woodpecker
+woodpecker_postgresql_port: 5432
+
+# 1Password references
+woodpecker_op_postgresql_password: "op://Infrastructure/antiarctica_postgresql/password"
+woodpecker_op_agent_secret: "op://Infrastructure/antiarctica_woodpecker/agent-secret"
+woodpecker_op_gitea_client: "op://Infrastructure/antiarctica_woodpecker/gitea-client"
+woodpecker_op_gitea_secret: "op://Infrastructure/antiarctica_woodpecker/gitea-secret"

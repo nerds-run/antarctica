@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Run all linters"
+#MISE depends=["lint:yaml", "lint:ansible"]
+set -euo pipefail

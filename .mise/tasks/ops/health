@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+#MISE description="Check health endpoints for all services"
+set -euo pipefail
+
+KEY_FILE="${ANTARCTICA_SSH_KEY:-/tmp/antarctica-deploy.key}"
+HOST="${ANTARCTICA_HOST:-172.22.202.50}"
+
+if [ ! -f "$KEY_FILE" ]; then
+  mise run deploy:ssh-key
+fi
+
+echo "=== Forgejo ==="
+ssh -i "$KEY_FILE" -o StrictHostKeyChecking=accept-new "antarctica@$HOST" \
+  curl -sf http://127.0.0.1:3000/api/v1/version && echo "" || echo "UNHEALTHY"
+
+echo "=== Woodpecker ==="
+ssh -i "$KEY_FILE" -o StrictHostKeyChecking=accept-new "antarctica@$HOST" \
+  curl -sf http://127.0.0.1:3040/api/info && echo "" || echo "UNHEALTHY"
+
+echo "=== PostgreSQL (Woodpecker) ==="
+ssh -i "$KEY_FILE" -o StrictHostKeyChecking=accept-new "antarctica@$HOST" \
+  sudo podman exec postgresql pg_isready -U woodpecker || echo "UNHEALTHY"
+
+echo "=== PostgreSQL (Forgejo) ==="
+ssh -i "$KEY_FILE" -o StrictHostKeyChecking=accept-new "antarctica@$HOST" \
+  sudo podman exec forgejo-postgresql pg_isready -U forgejo || echo "UNHEALTHY"
+
+echo "=== Caddy ==="
+ssh -i "$KEY_FILE" -o StrictHostKeyChecking=accept-new "antarctica@$HOST" \
+  sudo systemctl is-active caddy

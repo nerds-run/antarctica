@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Run yamllint"
+set -euo pipefail
+
+cd "$MISE_PROJECT_ROOT"
+yamllint -c .yamllint ansible/roles/ ansible/playbooks/ ansible/inventory/ ansible/tests/ ansible/requirements.yml .ansible-lint .woodpecker.yml .pre-commit-config.yaml

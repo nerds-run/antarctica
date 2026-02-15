@@ -1,0 +1,32 @@
+---
+base_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - wget
+  - gnupg
+  - lsb-release
+  - software-properties-common
+  - unattended-upgrades
+  - apt-listchanges
+  - fail2ban
+  - nftables
+  - ufw
+  - qemu-guest-agent
+  - qemu-user-static
+  - binfmt-support
+  - cockpit
+  - zram-tools
+  - figlet
+  - lolcat
+  - htop
+  - rsync
+  - tree
+  - vim
+  - locales
+  - sudo
+  - openssh-server
+  - systemd-timesyncd
+  - libvirt-daemon-system
+  - libvirt-clients
+  - qemu-system

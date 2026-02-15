@@ -1,0 +1,245 @@
+---
+# -- Hostname --
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ base_server_hostname }}"
+  tags:
+    - molecule-notest
+
+- name: Set hostname in /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1'
+    line: "127.0.1.1 {{ base_server_hostname }}"
+    state: present
+  tags:
+    - molecule-notest
+
+# -- Apt packages (must run before locale/timezone) --
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install base packages
+  ansible.builtin.apt:
+    name: "{{ base_packages }}"
+    state: present
+
+# -- Locale --
+- name: Generate locale
+  community.general.locale_gen:
+    name: "{{ base_locale }}"
+    state: present
+
+- name: Set default locale
+  ansible.builtin.copy:
+    content: |
+      LANG={{ base_locale }}
+      LC_ALL={{ base_locale }}
+    dest: /etc/default/locale
+    mode: "0644"
+
+# -- Timezone --
+- name: Set timezone
+  community.general.timezone:
+    name: "{{ base_timezone }}"
+  notify: Restart timesyncd
+
+# -- Unattended upgrades --
+- name: Enable unattended upgrades
+  ansible.builtin.debconf:
+    name: unattended-upgrades
+    question: unattended-upgrades/enable_auto_updates
+    vtype: boolean
+    value: "true"
+
+- name: Configure unattended upgrades
+  ansible.builtin.copy:
+    content: |
+      Unattended-Upgrade::Automatic-Reboot "false";
+      Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+      Unattended-Upgrade::Remove-Unused-Dependencies "true";
+    dest: /etc/apt/apt.conf.d/51custom-unattended-upgrades
+    mode: "0644"
+
+# -- Sysctl --
+- name: Apply sysctl settings
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/99-antarctica.conf
+    reload: true
+  loop: "{{ base_sysctl_settings | dict2items }}"
+  tags:
+    - molecule-notest
+
+# -- zram swap --
+- name: Configure zram-tools
+  ansible.builtin.copy:
+    content: |
+      ALGO=zstd
+      PERCENT={{ base_zram_percent }}
+    dest: /etc/default/zramswap
+    mode: "0644"
+  notify: Restart zramswap
+  tags:
+    - molecule-notest
+
+# -- Sudo --
+- name: Disable sudo lecture
+  ansible.builtin.copy:
+    content: "Defaults lecture=never\n"
+    dest: /etc/sudoers.d/99-no-lecture
+    mode: "0440"
+    validate: "visudo -cf %s"
+
+# -- Deploy user --
+- name: Create deploy user
+  ansible.builtin.user:
+    name: "{{ base_deploy_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Grant deploy user passwordless sudo
+  ansible.builtin.copy:
+    content: "{{ base_deploy_user }} ALL=(ALL) NOPASSWD: ALL\n"
+    dest: "/etc/sudoers.d/{{ base_deploy_user }}"
+    mode: "0440"
+    validate: "visudo -cf %s"
+
+# -- User accounts --
+- name: Create user groups
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - libvirt
+    - kvm
+
+- name: Create user accounts
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups: "{{ item.groups }}"
+    shell: "{{ item.shell }}"
+    create_home: true
+    append: true
+  loop: "{{ base_users }}"
+
+- name: Set authorized keys for users
+  ansible.posix.authorized_key:
+    user: "{{ item.0.name }}"
+    key: "{{ item.1 }}"
+    state: present
+  loop: "{{ base_users | subelements('ssh_keys') }}"
+
+- name: Set authorized keys for root
+  ansible.posix.authorized_key:
+    user: root
+    key: "{{ item }}"
+    state: present
+  loop: "{{ base_root_ssh_keys }}"
+
+# -- SSH --
+- name: Deploy sshd_config
+  ansible.builtin.template:
+    src: sshd_config.j2
+    dest: /etc/ssh/sshd_config
+    mode: "0600"
+    validate: "sshd -t -f %s"
+  notify: Restart sshd
+  tags:
+    - molecule-notest
+
+# -- nftables firewall --
+- name: Deploy nftables config
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: /etc/nftables.conf
+    mode: "0644"
+  notify: Restart nftables
+
+- name: Enable and start nftables
+  ansible.builtin.systemd:
+    name: nftables
+    enabled: true
+    state: started
+  tags:
+    - molecule-notest
+
+# -- Disable ufw (we use nftables directly) --
+- name: Disable ufw
+  ansible.builtin.systemd:
+    name: ufw
+    enabled: false
+    state: stopped
+  failed_when: false
+  tags:
+    - molecule-notest
+
+# -- fail2ban --
+- name: Enable and start fail2ban
+  ansible.builtin.systemd:
+    name: fail2ban
+    enabled: true
+    state: started
+  tags:
+    - molecule-notest
+
+# -- MOTD --
+- name: Deploy MOTD
+  ansible.builtin.template:
+    src: motd.j2
+    dest: /etc/motd
+    mode: "0644"
+
+# -- Data directories --
+- name: Create data root directory
+  ansible.builtin.file:
+    path: "{{ base_data_root }}"
+    state: directory
+    mode: "0755"
+
+- name: Create data subdirectories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ base_data_dirs }}"
+
+# -- qemu-guest-agent --
+- name: Enable qemu-guest-agent
+  ansible.builtin.systemd:
+    name: qemu-guest-agent
+    enabled: true
+    state: started
+  tags:
+    - molecule-notest
+
+# -- binfmt for aarch64 --
+- name: Enable binfmt-support
+  ansible.builtin.systemd:
+    name: binfmt-support
+    enabled: true
+    state: started
+  tags:
+    - molecule-notest
+
+# -- Cockpit --
+- name: Enable cockpit
+  ansible.builtin.systemd:
+    name: cockpit.socket
+    enabled: true
+    state: started
+  tags:
+    - molecule-notest
+
+# -- NTP via systemd-timesyncd --
+- name: Enable systemd-timesyncd
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    enabled: true
+    state: started
+  tags:
+    - molecule-notest

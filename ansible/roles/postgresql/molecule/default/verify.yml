@@ -1,0 +1,27 @@
+---
+- name: Verify postgresql role
+  hosts: all
+  become: true
+  tasks:
+    - name: Check postgresql quadlet file exists
+      ansible.builtin.stat:
+        path: /etc/containers/systemd/postgresql.container
+      register: postgresql_quadlet
+
+    - name: Assert postgresql quadlet exists
+      ansible.builtin.assert:
+        that:
+          - postgresql_quadlet.stat.exists
+        fail_msg: "PostgreSQL quadlet file does not exist"
+
+    - name: Check postgresql data directory exists
+      ansible.builtin.stat:
+        path: /data/postgresql
+      register: postgresql_data
+
+    - name: Assert postgresql data directory exists
+      ansible.builtin.assert:
+        that:
+          - postgresql_data.stat.exists
+          - postgresql_data.stat.isdir
+        fail_msg: "/data/postgresql does not exist"

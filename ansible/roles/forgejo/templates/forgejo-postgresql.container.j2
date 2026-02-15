@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Forgejo PostgreSQL 16 (Podman Quadlet)
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+ContainerName={{ forgejo_db_container_name }}
+Image={{ forgejo_db_image }}
+AutoUpdate=registry
+PublishPort=127.0.0.1:{{ forgejo_db_port }}:5432
+Volume={{ forgejo_db_data_dir }}:/var/lib/postgresql/data:Z
+Network={{ container_runtime_network_name | default('antarctica') }}
+Environment=POSTGRES_DB={{ forgejo_db_name }}
+Environment=POSTGRES_USER={{ forgejo_db_user }}
+Environment=POSTGRES_PASSWORD={{ forgejo_db_password }}
+
+[Service]
+Restart=always
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target default.target

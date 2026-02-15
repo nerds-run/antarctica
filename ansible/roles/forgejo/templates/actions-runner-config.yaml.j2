@@ -1,0 +1,13 @@
+# {{ ansible_managed }}
+
+log:
+  level: info
+
+runner:
+  capacity: {{ forgejo_actions_runner_capacity }}
+  timeout: {{ forgejo_actions_runner_timeout }}
+
+container:
+  network: "{{ container_runtime_network_name | default('antarctica') }}"
+  privileged: false
+  docker_host: ""
