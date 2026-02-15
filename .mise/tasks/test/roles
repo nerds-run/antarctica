@@ -3,6 +3,8 @@
 set -euo pipefail
 
 cd "$MISE_PROJECT_ROOT"
+# shellcheck source=/dev/null
+source .venv/bin/activate
 for role in ansible/roles/*/; do
   role_name=$(basename "$role")
   if [ -d "$role/molecule/default" ]; then

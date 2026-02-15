@@ -4,5 +4,7 @@
 set -euo pipefail
 
 ROLE="${1:?Usage: mise run test:destroy <role_name>}"
+# shellcheck source=/dev/null
+source "$MISE_PROJECT_ROOT/.venv/bin/activate"
 cd "$MISE_PROJECT_ROOT/ansible/roles/$ROLE"
 molecule destroy
