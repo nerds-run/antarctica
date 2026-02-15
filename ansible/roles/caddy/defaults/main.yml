@@ -1,12 +1,10 @@
 ---
 caddy_forgejo_domain: forgejo.dev.nerds.run
 caddy_woodpecker_domain: woodpecker.dev.nerds.run
-caddy_registry_domain: registry.dev.nerds.run
 caddy_vscode_domain: vscode.dev.nerds.run
 caddy_cockpit_domain: cockpit.dev.nerds.run
 caddy_forgejo_http_port: 3000
 caddy_woodpecker_http_port: 3040
-caddy_registry_http_port: 5000
 caddy_vscode_http_port: 3100
 caddy_cockpit_http_port: 9090
 caddy_data_dir: /data/caddy

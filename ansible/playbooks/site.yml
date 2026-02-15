@@ -17,8 +17,6 @@
       tags: [forgejo, git]
     - role: woodpecker
       tags: [woodpecker, ci]
-    - role: docker_registry
-      tags: [docker_registry, registry]
     - role: openvscode
       tags: [openvscode, vscode]
     - role: dev_tools

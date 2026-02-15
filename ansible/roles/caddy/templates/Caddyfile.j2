@@ -12,6 +12,9 @@
 {{ caddy_forgejo_domain }} {
     tls internal
     import security_headers
+    request_body {
+        max_size 2GB
+    }
     reverse_proxy localhost:{{ caddy_forgejo_http_port }}
 }
 
@@ -19,15 +22,6 @@
     tls internal
     import security_headers
     reverse_proxy localhost:{{ caddy_woodpecker_http_port }}
-}
-
-{{ caddy_registry_domain }} {
-    tls internal
-    import security_headers
-    request_body {
-        max_size 2GB
-    }
-    reverse_proxy localhost:{{ caddy_registry_http_port }}
 }
 
 {{ caddy_vscode_domain }} {

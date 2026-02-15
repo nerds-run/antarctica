@@ -63,7 +63,6 @@ Antarctica is migrating from a NixOS-based server to **Debian 12 (Bookworm)** ma
 ```
 Internet --> Caddy (:443) --> Forgejo (:3000)
                           --> Woodpecker (:3040)
-                          --> Docker Registry (:5000)
                           --> OpenVSCode Server (:3100)
 
 Forgejo --> Forgejo PostgreSQL (:5433)
@@ -395,7 +394,6 @@ antarctica/
       woodpecker.yml       # Woodpecker only
       caddy.yml            # Caddy only
       postgresql.yml       # PostgreSQL only
-      docker_registry.yml  # Docker Registry only
       openvscode.yml       # OpenVSCode Server only
       dev_tools.yml        # Dev tools only
       validate.yml         # Validation checks
@@ -410,7 +408,6 @@ antarctica/
       postgresql/          # Database container
       forgejo/             # Git forge
       woodpecker/          # CI server + agent
-      docker_registry/     # Container image registry
       openvscode/          # Browser-based IDE
       dev_tools/           # Developer packages
 ```

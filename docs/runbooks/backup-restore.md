@@ -9,7 +9,6 @@
 | `/data/postgresql` | PostgreSQL database (Woodpecker data) | Critical |
 | `/data/woodpecker` | Woodpecker server state | High |
 | `/data/caddy` | TLS certificates, OCSP staples | Medium (auto-regenerated) |
-| `/data/registry` | Docker registry layers | Medium (can be rebuilt) |
 | `/data/openvscode` | OpenVSCode Server data | Low |
 
 ## Backup methods
@@ -70,7 +69,6 @@ sudo restic backup \
   /data/postgresql \
   /data/woodpecker \
   /data/caddy \
-  /data/registry \
   /data/openvscode
 
 # List snapshots
@@ -102,7 +100,6 @@ source_directories:
   - /data/postgresql
   - /data/woodpecker
   - /data/caddy
-  - /data/registry
   - /data/openvscode
 
 repositories:
@@ -138,7 +135,7 @@ hooks:
 0 */6 * * * root podman exec postgresql pg_dump -U woodpecker -d woodpecker --format=custom -f /data/backups/woodpecker-$(date +\%Y\%m\%d-\%H\%M).pgdump
 
 # Restic filesystem backup at 2 AM daily
-0 2 * * * root restic backup --repo /backup/antarctica /data/forgejo /data/forgejo-postgresql /data/postgresql /data/woodpecker /data/caddy /data/registry /data/openvscode --quiet
+0 2 * * * root restic backup --repo /backup/antarctica /data/forgejo /data/forgejo-postgresql /data/postgresql /data/woodpecker /data/caddy /data/openvscode --quiet
 
 # Cleanup old PostgreSQL dumps (keep 7 days)
 0 3 * * * root find /data/backups -name '*.pgdump' -mtime +7 -delete

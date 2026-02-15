@@ -10,6 +10,5 @@ container_runtime_unqualified_registries:
 container_runtime_data_dirs:
   - /data/forgejo
   - /data/woodpecker
-  - /data/registry
 
 container_runtime_prune_schedule: "0 3 * * 0"

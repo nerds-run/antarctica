@@ -8,7 +8,7 @@ Shared development server for NerdsRun, running **Debian 12** on **Proxmox**, ma
 ## Architecture
 
 - **Infrastructure**: Proxmox VM provisioned with Pulumi (`pulumi-proxmoxve`)
-- **Configuration**: Ansible (9 roles) for declarative server setup
+- **Configuration**: Ansible (8 roles) for declarative server setup
 - **Containers**: Podman 5.x with Quadlet (systemd-native container management)
 - **Reverse proxy**: Caddy (native systemd, automatic HTTPS)
 - **CI**: Woodpecker CI + Forgejo Actions runners
@@ -20,7 +20,6 @@ Shared development server for NerdsRun, running **Debian 12** on **Proxmox**, ma
 |---|---|---|
 | Forgejo (git forge) | 3000 | forgejo.dev.nerds.run |
 | Woodpecker CI | 3040 | woodpecker.dev.nerds.run |
-| Docker Registry | 5000 | registry.dev.nerds.run |
 | OpenVSCode Server | 3100 | vscode.dev.nerds.run |
 | Caddy (reverse proxy) | 80/443 | *.dev.nerds.run |
 | PostgreSQL (Woodpecker) | 5432 | -- |
@@ -76,7 +75,6 @@ mise run deploy:forgejo
 mise run deploy:woodpecker
 mise run deploy:caddy
 mise run deploy:postgresql
-mise run deploy:registry
 mise run deploy:openvscode
 mise run deploy:base
 mise run deploy:dev-tools
@@ -119,7 +117,6 @@ mise run test:verify     # Run verification only
 | `deploy:forgejo` | Deploy only Forgejo changes |
 | `deploy:woodpecker` | Deploy only Woodpecker changes |
 | `deploy:postgresql` | Deploy only PostgreSQL changes |
-| `deploy:registry` | Deploy only Docker Registry changes |
 | `deploy:openvscode` | Deploy only OpenVSCode Server changes |
 | `deploy:dev-tools` | Deploy only dev tools changes |
 | `deploy:check` | Dry-run deployment (check mode) |
@@ -189,7 +186,6 @@ antarctica/
       woodpecker.yml         # Woodpecker + deps
       caddy.yml              # Caddy reverse proxy
       postgresql.yml         # PostgreSQL
-      docker_registry.yml    # Docker Registry
       openvscode.yml         # OpenVSCode Server
       dev_tools.yml          # Dev tools
       validate.yml           # Validation checks
@@ -204,7 +200,6 @@ antarctica/
       postgresql/            # Database container
       forgejo/               # Git forge
       woodpecker/            # CI server + agent
-      docker_registry/       # Container image registry
       openvscode/            # Browser-based IDE
       dev_tools/             # Developer packages
 ```

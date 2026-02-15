@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Deploy only Docker Registry changes"
-set -euo pipefail
-
-cd "$MISE_PROJECT_ROOT/ansible"
-ansible-playbook playbooks/docker_registry.yml -i inventory/

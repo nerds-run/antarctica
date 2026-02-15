@@ -11,7 +11,6 @@
 //	/data/containers     -> Podman container storage
 //	/data/forgejo        -> Forgejo repositories + data
 //	/data/woodpecker     -> Woodpecker server state
-//	/data/registry       -> Docker registry layers
 //	/data/postgresql     -> PostgreSQL data directory
 //	/data/libvirt        -> Libvirt VM storage
 //	/data/docker         -> Docker data root
@@ -27,7 +26,6 @@ var DataPaths = []string{
 	"/data/containers",
 	"/data/forgejo",
 	"/data/woodpecker",
-	"/data/registry",
 	"/data/postgresql",
 	"/data/caddy",
 	"/data/openvscode",

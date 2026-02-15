@@ -7,7 +7,6 @@ base_locale: en_US.UTF-8
 # -- Domains --
 caddy_forgejo_domain: forgejo.dev.nerds.run
 caddy_woodpecker_domain: woodpecker.dev.nerds.run
-caddy_registry_domain: registry.dev.nerds.run
 caddy_vscode_domain: vscode.dev.nerds.run
 caddy_cockpit_domain: cockpit.dev.nerds.run
 forgejo_domain: forgejo.dev.nerds.run
@@ -19,13 +18,11 @@ forgejo_http_port: 3000
 forgejo_ssh_port: 2222
 caddy_forgejo_http_port: 3000
 caddy_woodpecker_http_port: 3040
-caddy_registry_http_port: 5000
 caddy_vscode_http_port: 3100
 caddy_cockpit_http_port: 9090
 woodpecker_http_port: 3040
 woodpecker_grpc_port: 3041
 postgresql_port: 5432
-docker_registry_port: 5000
 openvscode_port: 3100
 
 # -- Firewall (public-facing ports via nftables) --
@@ -62,7 +59,6 @@ base_data_dirs:
   - /data/woodpecker
   - /data/postgresql
   - /data/caddy
-  - /data/registry
   - /data/openvscode
 
 # -- Container --
@@ -95,10 +91,6 @@ woodpecker_admins: "abanna"
 woodpecker_db_driver: postgres
 woodpecker_max_workflows: 10
 woodpecker_log_level: debug
-
-# -- Docker Registry --
-docker_registry_image: docker.io/library/registry:2
-docker_registry_delete_enabled: true
 
 # -- OpenVSCode Server --
 openvscode_image: docker.io/gitpod/openvscode-server:latest

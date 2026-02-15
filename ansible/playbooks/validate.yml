@@ -77,7 +77,6 @@
         - /data/woodpecker
         - /data/postgresql
         - /data/caddy
-        - /data/registry
 
     - name: Check nftables is active
       ansible.builtin.systemd:

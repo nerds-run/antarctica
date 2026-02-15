@@ -43,7 +43,6 @@ Data directories to restore:
 | `/data/postgresql` | PostgreSQL database files |
 | `/data/woodpecker` | Woodpecker server data |
 | `/data/caddy` | Caddy TLS certificates and state |
-| `/data/registry` | Docker registry image layers |
 | `/data/openvscode` | OpenVSCode Server data |
 
 #### If using restic
