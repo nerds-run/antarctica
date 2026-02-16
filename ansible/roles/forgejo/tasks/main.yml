@@ -231,6 +231,43 @@
   tags:
     - molecule-notest
 
+- name: Retrieve Forgejo admin password from 1Password
+  ansible.builtin.command:
+    cmd: "op read '{{ forgejo_op_admin_password }}'"
+  register: forgejo_admin_password_result
+  changed_when: false
+  no_log: true
+  delegate_to: localhost
+  become: false
+  tags:
+    - molecule-notest
+
+- name: Check if Forgejo admin user exists
+  ansible.builtin.command:
+    cmd: >-
+      podman exec --user git {{ forgejo_container_name }}
+      forgejo admin user list --admin
+  register: forgejo_admin_check
+  changed_when: false
+  tags:
+    - molecule-notest
+
+- name: Create Forgejo admin user
+  ansible.builtin.command:
+    cmd: >-
+      podman exec --user git {{ forgejo_container_name }}
+      forgejo admin user create
+      --username {{ forgejo_admin_user }}
+      --password '{{ forgejo_admin_password_result.stdout }}'
+      --email {{ forgejo_admin_email }}
+      --admin
+      --must-change-password=false
+  changed_when: true
+  when: forgejo_admin_user not in forgejo_admin_check.stdout
+  no_log: true
+  tags:
+    - molecule-notest
+
 - name: Generate Forgejo API token for provisioning # noqa: no-changed-when
   ansible.builtin.shell:
     cmd: >-

@@ -30,7 +30,7 @@ This creates a new Debian 12 VM on Proxmox with the correct specs (32 GB RAM, 16
 mise run deploy:configure
 ```
 
-This installs all packages, creates users, configures the firewall, deploys Caddy, and creates all Podman Quadlet containers. Services will start but will have empty data.
+This installs all packages, creates users, configures the firewall, deploys Caddy, and creates all Podman Quadlet containers. The Forgejo admin user (`abanna`) is created automatically on first run using the password from 1Password (`op://Infrastructure/antiarctica_forgejo/admin_password`). Services will start but will have empty data.
 
 ### 3. Restore data from backups
 
