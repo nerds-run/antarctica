@@ -47,3 +47,5 @@ forgejo_op_internal_token: "op://Infrastructure/antiarctica_forgejo/internal-tok
 forgejo_op_oauth2_jwt_secret: "op://Infrastructure/antiarctica_forgejo/oauth2-jwt-secret"
 forgejo_op_lfs_jwt_secret: "op://Infrastructure/antiarctica_forgejo/lfs-jwt-secret"
 forgejo_op_action_runner_token: "op://Infrastructure/antiarctica_forgejo/action-runner-token"
+forgejo_admin_email: abanna@nerds.run
+forgejo_op_admin_password: "op://Infrastructure/antiarctica_forgejo/admin_password"

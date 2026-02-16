@@ -17,6 +17,7 @@ Antarctica secrets are stored in 1Password (Infrastructure vault) and referenced
 | Forgejo internal token | `op://Infrastructure/antiarctica_forgejo/internal-token` | Forgejo |
 | Forgejo OAuth2 JWT secret | `op://Infrastructure/antiarctica_forgejo/oauth2-jwt-secret` | Forgejo |
 | Forgejo LFS JWT secret | `op://Infrastructure/antiarctica_forgejo/lfs-jwt-secret` | Forgejo |
+| Forgejo admin password | `op://Infrastructure/antiarctica_forgejo/admin_password` | Forgejo (admin user creation) |
 | Actions runner token | `op://Infrastructure/antiarctica_forgejo/action-runner-token` | Forgejo Actions Runner |
 
 ## Rotate a secret
