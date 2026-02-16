@@ -15,7 +15,7 @@ config:
   # Cloud-init image template (must already exist on the Proxmox node)
   antarctica:cloud_init_template: debian-12-cloudinit
   # Storage pool for disks
-  antarctica:storage_pool: shared
+  antarctica:storage_pool: sharedx
   # Network (static IP)
   antarctica:network_bridge: vmbr0
   antarctica:ip_address: 172.22.202.50/24
